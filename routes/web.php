@@ -3,7 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FoodItemController;
-use App\Http\Controllers\BrowseController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,10 +26,10 @@ Route::middleware(['auth', 'provider', 'active.membership'])->group(function () 
 // Customer routes
 Route::middleware(['auth', 'customer'])->group(function () {
     Route::get('/customer/dashboard', [DashboardController::class, 'index'])->name('customer.dashboard');
-    Route::get('/browse', [BrowseController::class, 'index'])->name('browse.index');
-    Route::get('/browse/{foodItem}', [BrowseController::class, 'show'])->name('browse.show');
-    Route::get('/providers', [BrowseController::class, 'providers'])->name('browse.providers');
-    Route::get('/providers/{provider}', [BrowseController::class, 'provider'])->name('browse.provider');
+    Route::get('/search', [SearchController::class, 'index'])->name('search.index');
+    Route::get('/search/{foodItem}', [SearchController::class, 'show'])->name('search.show');
+    Route::get('/search/providers', [SearchController::class, 'providers'])->name('search.providers');
+    Route::get('/search/providers/{provider}', [SearchController::class, 'provider'])->name('search.provider');
 });
 
 // Order routes (accessible by both customers and providers)

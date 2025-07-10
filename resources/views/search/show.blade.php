@@ -140,7 +140,7 @@
                                         <h4 class="font-medium text-gray-900">{{ $item->title }}</h4>
                                         <p class="text-sm text-gray-600">by {{ $item->provider->name }}</p>
                                         <p class="text-lg font-bold text-green-600">₹{{ $item->price }}</p>
-                                        <a href="{{ route('browse.show', $item) }}" class="text-blue-600 hover:text-blue-800 text-sm">View Details</a>
+                                        <a href="{{ route('search.show', $item) }}" class="text-blue-600 hover:text-blue-800 text-sm">View Details</a>
                                     </div>
                                 @endforeach
                             </div>

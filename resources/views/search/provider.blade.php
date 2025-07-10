@@ -80,7 +80,7 @@
                             </div>
                             
                             <div class="mt-4">
-                                <a href="{{ route('browse.show', $item) }}" 
+                                <a href="{{ route('search.show', $item) }}" 
                                    class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2 rounded-lg">
                                     View Details
                                 </a>

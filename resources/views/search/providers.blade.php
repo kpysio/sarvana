@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Food Providers') }}
+            {{ __('Find Providers') }}
         </h2>
     </x-slot>
 
@@ -10,7 +10,7 @@
             <!-- Filters -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6">
-                    <form method="GET" action="{{ route('browse.providers') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <form method="GET" action="{{ route('search.providers') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                         <div>
                             <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
                             <input type="text" name="search" id="search" value="{{ request('search') }}" 
@@ -31,7 +31,7 @@
                             <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
                                 Apply Filters
                             </button>
-                            <a href="{{ route('browse.providers') }}" class="ml-2 text-gray-600 hover:text-gray-800">Clear Filters</a>
+                            <a href="{{ route('search.providers') }}" class="ml-2 text-gray-600 hover:text-gray-800">Clear Filters</a>
                         </div>
                     </form>
                 </div>
@@ -86,7 +86,7 @@
                             </div>
 
                             <div class="flex space-x-2">
-                                <a href="{{ route('browse.provider', $provider) }}" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 rounded-lg">
+                                <a href="{{ route('search.provider', $provider) }}" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 rounded-lg">
                                     View Items
                                 </a>
                                 <button class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg">

@@ -10,10 +10,10 @@
             <!-- Quick Actions -->
             <div class="mb-6">
                 <div class="flex space-x-4">
-                    <a href="{{ route('browse.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                    <a href="{{ route('search.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
                         Browse Food Items
                     </a>
-                    <a href="{{ route('browse.providers') }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                    <a href="{{ route('search.providers') }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
                         Find Providers
                     </a>
                 </div>
@@ -50,7 +50,7 @@
                             @endforeach
                         </div>
                     @else
-                        <p class="text-gray-500">No orders yet. <a href="{{ route('browse.index') }}" class="text-blue-600 hover:text-blue-800">Start browsing</a></p>
+                        <p class="text-gray-500">No orders yet. <a href="{{ route('search.index') }}" class="text-blue-600 hover:text-blue-800">Start browsing</a></p>
                     @endif
                 </div>
             </div>
@@ -68,12 +68,12 @@
                                     <h4 class="font-medium text-gray-900">{{ $follow->provider->name }}</h4>
                                     <p class="text-sm text-gray-600">Rating: {{ $follow->provider->rating }}/5</p>
                                     <p class="text-sm text-gray-600">{{ $follow->provider->foodItems->count() }} items</p>
-                                    <a href="{{ route('browse.provider', $follow->provider) }}" class="text-blue-600 hover:text-blue-800 text-sm">View Items</a>
+                                    <a href="{{ route('search.provider', $follow->provider) }}" class="text-blue-600 hover:text-blue-800 text-sm">View Items</a>
                                 </div>
                             @endforeach
                         </div>
                     @else
-                        <p class="text-gray-500">Not following any providers yet. <a href="{{ route('browse.providers') }}" class="text-blue-600 hover:text-blue-800">Find providers to follow</a></p>
+                        <p class="text-gray-500">Not following any providers yet. <a href="{{ route('search.providers') }}" class="text-blue-600 hover:text-blue-800">Find providers to follow</a></p>
                     @endif
                 </div>
             </div>
@@ -92,7 +92,7 @@
                                     <p class="text-sm text-gray-600">{{ $item->category }}</p>
                                     <p class="text-sm text-gray-600">by {{ $item->provider->name }}</p>
                                     <p class="text-lg font-bold text-green-600">₹{{ $item->price }}</p>
-                                    <a href="{{ route('browse.show', $item) }}" class="text-blue-600 hover:text-blue-800 text-sm">View Details</a>
+                                    <a href="{{ route('search.show', $item) }}" class="text-blue-600 hover:text-blue-800 text-sm">View Details</a>
                                 </div>
                             @endforeach
                         </div>

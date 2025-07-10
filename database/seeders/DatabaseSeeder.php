@@ -97,5 +97,7 @@ class DatabaseSeeder extends Seeder
         Follower::factory()
             ->count(40)
             ->create();
+
+        $this->call(TagSeeder::class);
     }
 }

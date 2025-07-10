@@ -46,6 +46,11 @@ class FoodItem extends Model
         return $this->hasMany(Review::class);
     }
 
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'food_item_tags');
+    }
+
     // Scopes
     public function scopeActive($query)
     {
