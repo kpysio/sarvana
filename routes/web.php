@@ -17,7 +17,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['au
 // Provider routes
 Route::middleware(['auth', 'provider', 'active.membership'])->group(function () {
     Route::get('/provider/dashboard', [DashboardController::class, 'index'])->name('provider.dashboard');
-    Route::resource('food-items', FoodItemController::class);
+    Route::resource('food-items', FoodItemController::class, ['except' => ['show']]);
     Route::get('/provider/onboarding', function () {
         return view('provider.onboarding');
     })->name('provider.onboarding');
@@ -33,7 +33,7 @@ Route::middleware(['auth', 'customer'])->group(function () {
 });
 
 // Public food item detail route
-Route::get('/food-items/{foodItem}', [\App\Http\Controllers\FoodItemController::class, 'show'])->name('food-items.show');
+Route::get('/food-items/{foodItem}', [FoodItemController::class, 'show'])->name('food-items.show');
 
 // Order routes (accessible by both customers and providers)
 Route::middleware('auth')->group(function () {

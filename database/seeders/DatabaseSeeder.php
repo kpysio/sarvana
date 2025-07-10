@@ -16,6 +16,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Truncate tables to avoid duplicate entries
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \App\Models\Review::truncate();
+        \App\Models\Order::truncate();
+        \App\Models\FoodItem::truncate();
+        \App\Models\Follower::truncate();
+        \App\Models\User::truncate();
+        \App\Models\Tag::truncate();
+        \DB::table('food_item_tags')->truncate();
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
         // Create admin user
         User::factory()->create([
             'name' => 'Admin User',

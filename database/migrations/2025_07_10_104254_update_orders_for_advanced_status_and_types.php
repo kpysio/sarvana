@@ -12,6 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
+            $table->enum('order_type', ['daily', 'subscription', 'custom'])->default('daily')->after('customer_notes');
+            $table->integer('subscription_days')->nullable()->after('order_type');
+            $table->text('custom_details')->nullable()->after('subscription_days');
+            $table->string('proof_photo')->nullable()->after('custom_details');
             $table->enum('status', ['pending', 'accepted', 'preparing', 'ready', 'collected', 'completed', 'cancelled', 'rejected'])->default('pending')->change();
         });
     }

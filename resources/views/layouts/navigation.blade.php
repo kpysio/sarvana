@@ -15,6 +15,18 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    @if(Auth::user() && Auth::user()->user_type === 'provider')
+                        <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
+                            {{ __('My Orders') }}
+                        </x-nav-link>
+                    @elseif(Auth::user() && Auth::user()->user_type === 'customer')
+                        <x-nav-link :href="route('search.index')" :active="request()->routeIs('search.*')">
+                            {{ __('Search') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
+                            {{ __('My Orders') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -70,6 +82,18 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            @if(Auth::user() && Auth::user()->user_type === 'provider')
+                <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
+                    {{ __('My Orders') }}
+                </x-responsive-nav-link>
+            @elseif(Auth::user() && Auth::user()->user_type === 'customer')
+                <x-responsive-nav-link :href="route('search.index')" :active="request()->routeIs('search.*')">
+                    {{ __('Search') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
+                    {{ __('My Orders') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->

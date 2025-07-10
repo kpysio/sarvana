@@ -35,7 +35,7 @@ class OrderFactory extends Factory
             'food_item_id' => $foodItem->id,
             'quantity' => $quantity,
             'total_amount' => $foodItem->price * $quantity,
-            'status' => fake()->randomElement(['pending', 'confirmed', 'completed', 'cancelled']),
+            'status' => fake()->randomElement(['pending', 'accepted', 'preparing', 'ready', 'collected', 'completed', 'cancelled', 'rejected']),
             'pickup_time' => fake()->dateTimeBetween('now', '+2 days'),
             'notes' => fake()->randomElement([
                 'Please call when ready',

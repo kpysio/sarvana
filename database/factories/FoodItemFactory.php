@@ -84,10 +84,10 @@ class FoodItemFactory extends Factory
             'available_date' => fake()->dateTimeBetween('now', '+7 days')->format('Y-m-d'),
             'available_time' => fake()->time('H:i'),
             'pickup_address' => fake()->address(),
-            'photos' => json_encode([
-                'https://via.placeholder.com/400x300/FF6B6B/FFFFFF?text=' . urlencode($foodItem['name']),
-                'https://via.placeholder.com/400x300/4ECDC4/FFFFFF?text=Food+Photo'
-            ]),
+            'photos' => [
+                'https://placehold.co/400x300/FF6B6B/FFFFFF?text=' . urlencode($foodItem['name']),
+                'https://placehold.co/400x300/4ECDC4/FFFFFF?text=Food+Photo'
+            ],
             'status' => fake()->randomElement(['active', 'active', 'active', 'inactive']), // 75% active
         ];
     }
