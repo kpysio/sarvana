@@ -65,7 +65,7 @@ class FoodItemController extends Controller
      */
     public function show(FoodItem $foodItem)
     {
-        $this->authorize('view', $foodItem);
+        // $this->authorize('view', $foodItem);
         return view('food-items.show', compact('foodItem'));
     }
 

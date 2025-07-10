@@ -64,13 +64,15 @@ class DatabaseSeeder extends Seeder
             ->create();
 
         // Create food items for each provider
+        $allFoodItems = collect();
         foreach ($providers as $provider) {
-            FoodItem::factory()
+            $items = FoodItem::factory()
                 ->count(fake()->numberBetween(3, 8))
                 ->create([
                     'provider_id' => $provider->id,
                     'pickup_address' => $provider->address,
                 ]);
+            $allFoodItems = $allFoodItems->concat($items);
         }
 
         // Create orders
@@ -99,5 +101,11 @@ class DatabaseSeeder extends Seeder
             ->create();
 
         $this->call(TagSeeder::class);
+
+        // Assign random tags to each food item for filter testing
+        $tagIds = \App\Models\Tag::pluck('id')->all();
+        foreach ($allFoodItems as $item) {
+            $item->tags()->sync(fake()->randomElements($tagIds, fake()->numberBetween(1, 3)));
+        }
     }
 }

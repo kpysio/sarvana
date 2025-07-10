@@ -40,10 +40,23 @@ class DashboardController extends Controller
      */
     private function customerDashboard($user)
     {
-        $recentOrders = $user->customerOrders()->with(['provider', 'foodItem'])->latest()->take(5)->get();
-        $followedProviders = $user->following()->with('provider')->get();
-        $recommendedItems = FoodItem::active()->with('provider')->latest()->take(6)->get();
+        $activeOrders = $user->customerOrders()
+            ->whereIn('status', ['pending', 'accepted', 'preparing', 'ready', 'collected'])
+            ->with(['provider', 'foodItem'])
+            ->latest()
+            ->get();
 
-        return view('dashboard.customer', compact('recentOrders', 'followedProviders', 'recommendedItems'));
+        $orderHistory = $user->customerOrders()
+            ->whereIn('status', ['completed', 'cancelled', 'rejected'])
+            ->with(['provider', 'foodItem'])
+            ->latest()
+            ->get();
+
+        // Guess: favorites is a relation on user, fallback to empty if not present
+        $favorites = method_exists($user, 'favorites')
+            ? $user->favorites()->with(['provider'])->get()
+            : collect();
+
+        return view('dashboard.customer', compact('activeOrders', 'orderHistory', 'favorites'));
     }
 }

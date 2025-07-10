@@ -43,34 +43,31 @@ class OrderController extends Controller
             'quantity' => 'required|integer|min:1',
             'pickup_time' => 'required|date|after:now',
             'customer_notes' => 'nullable|string',
+            'order_type' => 'required|in:daily,subscription,custom',
+            'subscription_days' => 'nullable|integer|min:1',
+            'custom_details' => 'nullable|string',
         ]);
 
-        // Get the food item
         $foodItem = FoodItem::findOrFail($validated['food_item_id']);
-        
-        // Check if item is available
         if ($foodItem->status !== 'active' || $foodItem->available_quantity < $validated['quantity']) {
             return back()->withErrors(['quantity' => 'This item is not available in the requested quantity.']);
         }
-
-        // Calculate total amount
         $totalAmount = $foodItem->price * $validated['quantity'];
 
-        // Create the order
         $order = Order::create([
             'customer_id' => auth()->id(),
             'provider_id' => $validated['provider_id'],
             'food_item_id' => $validated['food_item_id'],
             'quantity' => $validated['quantity'],
             'total_amount' => $totalAmount,
-            'status' => 'pending',
+            'status' => Order::STATUS_PENDING,
             'pickup_time' => $validated['pickup_time'],
-            'customer_notes' => $validated['customer_notes'],
+            'customer_notes' => $validated['customer_notes'] ?? null,
+            'order_type' => $validated['order_type'],
+            'subscription_days' => $validated['order_type'] === 'subscription' ? $validated['subscription_days'] : null,
+            'custom_details' => $validated['order_type'] === 'custom' ? $validated['custom_details'] : null,
         ]);
-
-        // Update food item quantity
         $foodItem->decrement('available_quantity', $validated['quantity']);
-
         return redirect()->route('orders.show', $order)->with('success', 'Order placed successfully!');
     }
 
@@ -127,5 +124,67 @@ class OrderController extends Controller
         $order->update(['status' => 'cancelled']);
 
         return redirect()->route('orders.index')->with('success', 'Order cancelled successfully!');
+    }
+
+    // Provider actions for status transitions
+    public function accept(Order $order)
+    {
+        $this->authorize('update', $order);
+        if ($order->isPending()) {
+            $order->update(['status' => Order::STATUS_ACCEPTED]);
+        }
+        return back();
+    }
+    public function reject(Order $order)
+    {
+        $this->authorize('update', $order);
+        if ($order->isPending()) {
+            $order->update(['status' => Order::STATUS_REJECTED]);
+            $order->foodItem->increment('available_quantity', $order->quantity);
+        }
+        return back();
+    }
+    public function preparing(Order $order)
+    {
+        $this->authorize('update', $order);
+        if ($order->status === Order::STATUS_ACCEPTED) {
+            $order->update(['status' => Order::STATUS_PREPARING]);
+        }
+        return back();
+    }
+    public function ready(Request $request, Order $order)
+    {
+        $this->authorize('update', $order);
+        $request->validate(['proof_photo' => 'required|image|max:4096']);
+        if ($order->status === Order::STATUS_PREPARING) {
+            $path = $request->file('proof_photo')->store('order_proofs', 'public');
+            $order->update(['status' => Order::STATUS_READY, 'proof_photo' => $path]);
+        }
+        return back();
+    }
+    public function collected(Order $order)
+    {
+        $this->authorize('update', $order);
+        if ($order->status === Order::STATUS_READY) {
+            $order->update(['status' => Order::STATUS_COLLECTED]);
+        }
+        return back();
+    }
+    public function completed(Order $order)
+    {
+        $this->authorize('update', $order);
+        if ($order->status === Order::STATUS_COLLECTED) {
+            $order->update(['status' => Order::STATUS_COMPLETED]);
+        }
+        return back();
+    }
+    public function cancel(Order $order)
+    {
+        $this->authorize('delete', $order);
+        if ($order->isPending()) {
+            $order->foodItem->increment('available_quantity', $order->quantity);
+            $order->update(['status' => Order::STATUS_CANCELLED]);
+        }
+        return back();
     }
 }

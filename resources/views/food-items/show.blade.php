@@ -104,4 +104,57 @@
             </div>
         </div>
     </div>
+
+    @if(auth()->user() && auth()->user()->isCustomer())
+        <div class="max-w-xl mx-auto mt-10 bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-semibold mb-4">Order This Item</h3>
+            <form action="{{ route('orders.store') }}" method="POST">
+                @csrf
+                <input type="hidden" name="food_item_id" value="{{ $foodItem->id }}">
+                <input type="hidden" name="provider_id" value="{{ $foodItem->provider_id }}">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Order Type</label>
+                    <select name="order_type" class="w-full border border-gray-300 rounded-md px-3 py-2" required>
+                        <option value="daily">Daily (one-time)</option>
+                        <option value="subscription">Subscription</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                <div class="mb-4" id="subscriptionDaysField" style="display:none;">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Subscription Days</label>
+                    <input type="number" name="subscription_days" min="1" max="30" class="w-full border border-gray-300 rounded-md px-3 py-2">
+                </div>
+                <div class="mb-4" id="customDetailsField" style="display:none;">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Custom Order Details</label>
+                    <textarea name="custom_details" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                    <input type="number" name="quantity" min="1" max="{{ $foodItem->available_quantity }}" value="1" class="w-full border border-gray-300 rounded-md px-3 py-2" required>
+                    <span class="text-xs text-gray-500">Available: {{ $foodItem->available_quantity }}</span>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Pickup Time</label>
+                    <input type="datetime-local" name="pickup_time" class="w-full border border-gray-300 rounded-md px-3 py-2" required value="{{ $foodItem->available_date->format('Y-m-d') }}T{{ $foodItem->available_time }}">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Special Instructions</label>
+                    <textarea name="customer_notes" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-md">Place Order</button>
+            </form>
+        </div>
+        <script>
+            // Show/hide subscription/custom fields
+            document.addEventListener('DOMContentLoaded', function() {
+                const orderType = document.querySelector('select[name=order_type]');
+                const subField = document.getElementById('subscriptionDaysField');
+                const customField = document.getElementById('customDetailsField');
+                orderType.addEventListener('change', function() {
+                    subField.style.display = this.value === 'subscription' ? '' : 'none';
+                    customField.style.display = this.value === 'custom' ? '' : 'none';
+                });
+            });
+        </script>
+    @endif
 </x-app-layout> 

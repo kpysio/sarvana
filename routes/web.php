@@ -32,9 +32,19 @@ Route::middleware(['auth', 'customer'])->group(function () {
     Route::get('/search/providers/{provider}', [SearchController::class, 'provider'])->name('search.provider');
 });
 
+// Public food item detail route
+Route::get('/food-items/{foodItem}', [\App\Http\Controllers\FoodItemController::class, 'show'])->name('food-items.show');
+
 // Order routes (accessible by both customers and providers)
 Route::middleware('auth')->group(function () {
     Route::resource('orders', OrderController::class);
+    Route::post('/orders/{order}/accept', [\App\Http\Controllers\OrderController::class, 'accept'])->name('orders.accept');
+    Route::post('/orders/{order}/reject', [\App\Http\Controllers\OrderController::class, 'reject'])->name('orders.reject');
+    Route::post('/orders/{order}/preparing', [\App\Http\Controllers\OrderController::class, 'preparing'])->name('orders.preparing');
+    Route::post('/orders/{order}/ready', [\App\Http\Controllers\OrderController::class, 'ready'])->name('orders.ready');
+    Route::post('/orders/{order}/collected', [\App\Http\Controllers\OrderController::class, 'collected'])->name('orders.collected');
+    Route::post('/orders/{order}/completed', [\App\Http\Controllers\OrderController::class, 'completed'])->name('orders.completed');
+    Route::post('/orders/{order}/cancel', [\App\Http\Controllers\OrderController::class, 'cancel'])->name('orders.cancel');
 });
 
 // Membership routes

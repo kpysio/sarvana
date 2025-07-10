@@ -242,64 +242,66 @@
             <!-- Food Items Grid/List -->
             <div id="foodGrid" class="grid gap-6 {{ !request('view') || request('view')=='grid' ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1' }}">
                 @forelse($foodItems as $item)
-                    <div class="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow duration-200 cursor-pointer relative group" onclick="openFoodModal({{ $item->id }})">
-                        <!-- Badges -->
-                        <div class="absolute top-3 left-3 flex flex-col gap-1 z-10">
-                            @if($item->price < 10)
-                                <span class="badge bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold">Great Value</span>
-                            @endif
-                            @if($item->provider && $item->provider->rating >= 4.7)
-                                <span class="badge bg-yellow-400 text-gray-900 px-2 py-1 rounded text-xs font-semibold">Top Rated</span>
-                            @endif
-                        </div>
-                        <!-- Food Image -->
-                        <div class="aspect-w-16 aspect-h-9 rounded-t-lg overflow-hidden">
-                            @if($item->photos && is_array($item->photos) && count($item->photos) > 0 && $item->photos[0])
-                                <img 
-                                    src="{{ $item->photos[0] }}" 
-                                    alt="{{ $item->title }}"
-                                    class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-200"
-                                >
-                            @else
-                                <img 
-                                    src="https://placehold.co/400x300/orange/fff?text=No+Photo" 
-                                    alt="No Photo"
-                                    class="w-full h-48 object-cover"
-                                >
-                            @endif
-                        </div>
-                        <!-- Content -->
-                        <div class="p-4">
-                            <!-- Tags -->
-                            <div class="flex flex-wrap gap-1 mb-2">
-                                @foreach($item->tags as $tag)
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style="background: {{ $tag->color }}20; color: {{ $tag->color }};">
-                                        {{ $tag->icon }} {{ $tag->name }}
-                                    </span>
-                                @endforeach
+                    <a href="{{ route('food-items.show', $item) }}" class="block">
+                        <div class="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow duration-200 cursor-pointer relative group">
+                            <!-- Badges -->
+                            <div class="absolute top-3 left-3 flex flex-col gap-1 z-10">
+                                @if($item->price < 10)
+                                    <span class="badge bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold">Great Value</span>
+                                @endif
+                                @if($item->provider && $item->provider->rating >= 4.7)
+                                    <span class="badge bg-yellow-400 text-gray-900 px-2 py-1 rounded text-xs font-semibold">Top Rated</span>
+                                @endif
                             </div>
-                            <!-- Title & Description -->
-                            <h3 class="font-semibold text-lg text-gray-900 mb-1">{{ $item->title }}</h3>
-                            <p class="text-gray-600 text-sm mb-3 line-clamp-2">{{ $item->description }}</p>
-                            <!-- Provider Info -->
-                            <div class="flex items-center gap-2 mb-3">
-                                <div class="flex items-center">
-                                    <span class="text-yellow-400">⭐</span>
-                                    <span class="text-sm text-gray-600 ml-1">{{ number_format($item->provider->rating, 1) }}</span>
+                            <!-- Food Image -->
+                            <div class="aspect-w-16 aspect-h-9 rounded-t-lg overflow-hidden">
+                                @if($item->photos && is_array($item->photos) && count($item->photos) > 0 && $item->photos[0])
+                                    <img 
+                                        src="{{ $item->photos[0] }}" 
+                                        alt="{{ $item->title }}"
+                                        class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-200"
+                                    >
+                                @else
+                                    <img 
+                                        src="https://placehold.co/400x300/orange/fff?text=No+Photo" 
+                                        alt="No Photo"
+                                        class="w-full h-48 object-cover"
+                                    >
+                                @endif
+                            </div>
+                            <!-- Content -->
+                            <div class="p-4">
+                                <!-- Tags -->
+                                <div class="flex flex-wrap gap-1 mb-2">
+                                    @foreach($item->tags as $tag)
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style="background: {{ $tag->color }}20; color: {{ $tag->color }};">
+                                            {{ $tag->icon }} {{ $tag->name }}
+                                        </span>
+                                    @endforeach
                                 </div>
-                                <span class="text-gray-300">•</span>
-                                <span class="text-sm text-gray-600">{{ $item->provider->name }}</span>
-                            </div>
-                            <!-- Price & Availability -->
-                            <div class="flex items-center justify-between">
-                                <span class="text-lg font-bold text-gray-900">₹{{ number_format($item->price, 2) }}</span>
-                                <div class="text-right">
-                                    <div class="text-sm text-gray-500">Available: {{ $item->available_date }}</div>
-                                    <div class="text-sm text-green-600">{{ $item->available_quantity }} left</div>
+                                <!-- Title & Description -->
+                                <h3 class="font-semibold text-lg text-gray-900 mb-1">{{ $item->title }}</h3>
+                                <p class="text-gray-600 text-sm mb-3 line-clamp-2">{{ $item->description }}</p>
+                                <!-- Provider Info -->
+                                <div class="flex items-center gap-2 mb-3">
+                                    <div class="flex items-center">
+                                        <span class="text-yellow-400">⭐</span>
+                                        <span class="text-sm text-gray-600 ml-1">{{ number_format($item->provider->rating, 1) }}</span>
+                                    </div>
+                                    <span class="text-gray-300">•</span>
+                                    <span class="text-sm text-gray-600">{{ $item->provider->name }}</span>
+                                </div>
+                                <!-- Price & Availability -->
+                                <div class="flex items-center justify-between">
+                                    <span class="text-lg font-bold text-gray-900">₹{{ number_format($item->price, 2) }}</span>
+                                    <div class="text-right">
+                                        <div class="text-sm text-gray-500">Available: {{ $item->available_date }}</div>
+                                        <div class="text-sm text-green-600">{{ $item->available_quantity }} left</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 @empty
                     <div class="col-span-full text-center py-12">
                         <div class="text-gray-500 text-lg mb-2">🔍 No food items found</div>

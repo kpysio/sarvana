@@ -32,9 +32,15 @@
                                 <div>
                                     <span class="text-sm font-medium text-gray-500">Status</span>
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                        {{ $order->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                           ($order->status === 'confirmed' ? 'bg-blue-100 text-blue-800' : 
-                                           ($order->status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')) }}">
+                                        @if($order->status === 'pending') bg-yellow-100 text-yellow-800
+                                        @elseif($order->status === 'accepted') bg-blue-100 text-blue-800
+                                        @elseif($order->status === 'preparing') bg-orange-100 text-orange-800
+                                        @elseif($order->status === 'ready') bg-green-100 text-green-800
+                                        @elseif($order->status === 'collected') bg-indigo-100 text-indigo-800
+                                        @elseif($order->status === 'completed') bg-gray-100 text-gray-800
+                                        @elseif($order->status === 'cancelled') bg-red-100 text-red-800
+                                        @elseif($order->status === 'rejected') bg-red-200 text-red-900
+                                        @endif">
                                         {{ ucfirst($order->status) }}
                                     </span>
                                 </div>
@@ -131,24 +137,65 @@
                         </div>
                     @endif
 
+                    <!-- Status Timeline/Progress Bar -->
+                    <div class="mt-8">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Order Progress</h3>
+                        <div class="flex items-center space-x-4">
+                            @php
+                                $steps = ['pending','accepted','preparing','ready','collected','completed'];
+                                $current = array_search($order->status, $steps);
+                            @endphp
+                            @foreach($steps as $i => $step)
+                                <div class="flex items-center">
+                                    <span class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-bold
+                                        @if($i < $current) bg-green-500 text-white
+                                        @elseif($i == $current) bg-blue-500 text-white
+                                        @else bg-gray-200 text-gray-500
+                                        @endif">
+                                        {{ $i+1 }}
+                                    </span>
+                                    @if($i < count($steps)-1)
+                                        <span class="w-8 h-1 bg-gray-300 mx-1"></span>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500 mt-2">
+                            <span>Placed</span><span>Accepted</span><span>Preparing</span><span>Ready</span><span>Collected</span><span>Completed</span>
+                        </div>
+                    </div>
+
+                    <!-- Proof Photo -->
+                    @if($order->proof_photo)
+                        <div class="mt-8">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Proof of Preparation</h3>
+                            <img src="{{ asset('storage/' . $order->proof_photo) }}" alt="Proof Photo" class="w-full max-w-xs rounded-lg shadow">
+                        </div>
+                    @endif
+
                     <!-- Actions -->
                     <div class="mt-8 pt-6 border-t border-gray-200">
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Actions</h3>
                         <div class="flex space-x-4">
-                            @if(auth()->user()->isProvider() && $order->status === 'pending')
-                                <a href="{{ route('orders.edit', $order) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-                                    Update Order Status
-                                </a>
+                            @if(auth()->user()->isProvider())
+                                @if($order->status === 'pending')
+                                    <form action="{{ route('orders.accept', $order) }}" method="POST" class="inline">@csrf<button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg mr-2">Accept</button></form>
+                                    <form action="{{ route('orders.reject', $order) }}" method="POST" class="inline">@csrf<button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg mr-2">Reject</button></form>
+                                @elseif($order->status === 'accepted')
+                                    <form action="{{ route('orders.preparing', $order) }}" method="POST" class="inline">@csrf<button type="submit" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg mr-2">Set Preparing</button></form>
+                                @elseif($order->status === 'preparing')
+                                    <form action="{{ route('orders.ready', $order) }}" method="POST" enctype="multipart/form-data" class="inline">@csrf<input type="file" name="proof_photo" required class="inline-block text-xs mr-2"><button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Mark Ready</button></form>
+                                @elseif($order->status === 'ready')
+                                    <form action="{{ route('orders.collected', $order) }}" method="POST" class="inline">@csrf<button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg mr-2">Mark Collected</button></form>
+                                @elseif($order->status === 'collected')
+                                    <form action="{{ route('orders.completed', $order) }}" method="POST" class="inline">@csrf<button type="submit" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg">Mark Completed</button></form>
+                                @endif
                             @endif
                             @if(auth()->user()->isCustomer() && $order->status === 'pending')
-                                <form action="{{ route('orders.destroy', $order) }}" method="POST" class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
-                                            onclick="return confirm('Are you sure you want to cancel this order?')">
-                                        Cancel Order
-                                    </button>
-                                </form>
+                                <form action="{{ route('orders.cancel', $order) }}" method="POST" class="inline">@csrf<button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg">Cancel Order</button></form>
+                            @endif
+                            @if(auth()->user()->isCustomer() && $order->status === 'ready' && $order->proof_photo)
+                                <a href="{{ asset('storage/' . $order->proof_photo) }}" target="_blank" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">View Proof</a>
                             @endif
                         </div>
                     </div>
