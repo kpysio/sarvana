@@ -3,12 +3,21 @@
 @section('title', 'Tag Management')
 
 @section('content')
-<div class="flex items-center justify-between mb-8">
-    <h2 class="text-2xl font-bold text-gray-800">Tag Management</h2>
-    <a href="{{ route('admin.tags.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+<div class="mb-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Tag Management</h2>
+            <p class="text-gray-600">View and manage all Tags and categories</p>
+        </div>
+        <div class="flex space-x-2">
+            <a href="{{ route('admin.tags.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
                 Add New Tag
             </a>
+            
+        </div>
+    </div>
 </div>
+
 
 @php
 $categoryOptions = [
