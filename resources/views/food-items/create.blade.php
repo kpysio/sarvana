@@ -16,14 +16,14 @@
                             <!-- Title -->
                             <div class="md:col-span-2">
                                 <x-input-label for="title" :value="__('Title')" />
-                                <x-text-input id="title" class="block mt-1 w-full" type="text" name="title" :value="old('title')" required />
+                                <x-text-input id="title" class="block mt-1 w-full" type="text" name="title" :value="old('title', $clone->title ?? '')" required />
                                 <x-input-error :messages="$errors->get('title')" class="mt-2" />
                             </div>
 
                             <!-- Description -->
                             <div class="md:col-span-2">
                                 <x-input-label for="description" :value="__('Description')" />
-                                <textarea id="description" name="description" rows="4" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>{{ old('description') }}</textarea>
+                                <textarea id="description" name="description" rows="4" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>{{ old('description', $clone->description ?? '') }}</textarea>
                                 <x-input-error :messages="$errors->get('description')" class="mt-2" />
                             </div>
 
@@ -32,13 +32,13 @@
                                 <x-input-label for="category" :value="__('Category')" />
                                 <select id="category" name="category" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                                     <option value="">Select Category</option>
-                                    <option value="burger" {{ old('category') == 'burger' ? 'selected' : '' }}>Burger</option>
-                                    <option value="tiffin" {{ old('category') == 'tiffin' ? 'selected' : '' }}>Tiffin</option>
-                                    <option value="cake" {{ old('category') == 'cake' ? 'selected' : '' }}>Cake</option>
-                                    <option value="snacks" {{ old('category') == 'snacks' ? 'selected' : '' }}>Snacks</option>
-                                    <option value="biryani" {{ old('category') == 'biryani' ? 'selected' : '' }}>Biryani</option>
-                                    <option value="sweets" {{ old('category') == 'sweets' ? 'selected' : '' }}>Sweets</option>
-                                    <option value="other" {{ old('category') == 'other' ? 'selected' : '' }}>Other</option>
+                                    <option value="burger" {{ old('category', $clone->category ?? '') == 'burger' ? 'selected' : '' }}>Burger</option>
+                                    <option value="tiffin" {{ old('category', $clone->category ?? '') == 'tiffin' ? 'selected' : '' }}>Tiffin</option>
+                                    <option value="cake" {{ old('category', $clone->category ?? '') == 'cake' ? 'selected' : '' }}>Cake</option>
+                                    <option value="snacks" {{ old('category', $clone->category ?? '') == 'snacks' ? 'selected' : '' }}>Snacks</option>
+                                    <option value="biryani" {{ old('category', $clone->category ?? '') == 'biryani' ? 'selected' : '' }}>Biryani</option>
+                                    <option value="sweets" {{ old('category', $clone->category ?? '') == 'sweets' ? 'selected' : '' }}>Sweets</option>
+                                    <option value="other" {{ old('category', $clone->category ?? '') == 'other' ? 'selected' : '' }}>Other</option>
                                 </select>
                                 <x-input-error :messages="$errors->get('category')" class="mt-2" />
                             </div>
@@ -46,37 +46,60 @@
                             <!-- Price -->
                             <div>
                                 <x-input-label for="price" :value="__('Price (₹)')" />
-                                <x-text-input id="price" class="block mt-1 w-full" type="number" name="price" :value="old('price')" step="0.01" min="0" required />
+                                <x-text-input id="price" class="block mt-1 w-full" type="number" name="price" :value="old('price', $clone->price ?? '')" step="0.01" min="0" required />
                                 <x-input-error :messages="$errors->get('price')" class="mt-2" />
                             </div>
 
                             <!-- Available Quantity -->
                             <div>
                                 <x-input-label for="available_quantity" :value="__('Available Quantity')" />
-                                <x-text-input id="available_quantity" class="block mt-1 w-full" type="number" name="available_quantity" :value="old('available_quantity')" min="1" required />
+                                <x-text-input id="available_quantity" class="block mt-1 w-full" type="number" name="available_quantity" :value="old('available_quantity', $clone->available_quantity ?? '')" min="1" required />
                                 <x-input-error :messages="$errors->get('available_quantity')" class="mt-2" />
                             </div>
 
                             <!-- Available Date -->
                             <div>
                                 <x-input-label for="available_date" :value="__('Available Date')" />
-                                <x-text-input id="available_date" class="block mt-1 w-full" type="date" name="available_date" :value="old('available_date')" required />
+                                <x-text-input id="available_date" class="block mt-1 w-full" type="date" name="available_date" :value="old('available_date', $clone->available_date ? $clone->available_date->format('Y-m-d') : '')" required />
                                 <x-input-error :messages="$errors->get('available_date')" class="mt-2" />
                             </div>
 
                             <!-- Available Time -->
                             <div>
                                 <x-input-label for="available_time" :value="__('Available Time')" />
-                                <x-text-input id="available_time" class="block mt-1 w-full" type="time" name="available_time" :value="old('available_time')" required />
+                                <x-text-input id="available_time" class="block mt-1 w-full" type="time" name="available_time" :value="old('available_time', $clone->available_time ? \Carbon\Carbon::parse($clone->available_time)->format('H:i') : '')" required />
                                 <x-input-error :messages="$errors->get('available_time')" class="mt-2" />
                             </div>
 
                             <!-- Pickup Address -->
                             <div class="md:col-span-2">
                                 <x-input-label for="pickup_address" :value="__('Pickup Address')" />
-                                <textarea id="pickup_address" name="pickup_address" rows="3" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>{{ old('pickup_address') }}</textarea>
+                                <textarea id="pickup_address" name="pickup_address" rows="3" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>{{ old('pickup_address', $clone->pickup_address ?? '') }}</textarea>
                                 <x-input-error :messages="$errors->get('pickup_address')" class="mt-2" />
                             </div>
+
+                            <!-- Order Type (Provider Only) -->
+                            @if(auth()->user() && auth()->user()->user_type === 'provider')
+                                <div class="md:col-span-2">
+                                    <x-input-label for="order_type" :value="__('Order Type')" />
+                                    <select id="order_type" name="order_type" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                        <option value="daily" {{ old('order_type', $clone->order_type ?? 'daily') == 'daily' ? 'selected' : '' }}>Daily (expires end of day)</option>
+                                        <option value="subscription" {{ old('order_type', $clone->order_type ?? '') == 'subscription' ? 'selected' : '' }}>Subscription</option>
+                                        <option value="custom" {{ old('order_type', $clone->order_type ?? '') == 'custom' ? 'selected' : '' }}>Custom</option>
+                                    </select>
+                                    <x-input-error :messages="$errors->get('order_type')" class="mt-2" />
+                                </div>
+                                <div class="md:col-span-2" id="expiry_date_field" style="display:none;">
+                                    <x-input-label for="expiry_date" :value="__('Expiry Date')" />
+                                    <x-text-input id="expiry_date" class="block mt-1 w-full" type="date" name="expiry_date" :value="old('expiry_date', isset($clone) && $clone->expiry_date ? $clone->expiry_date->format('Y-m-d') : '')" />
+                                    <div class="flex gap-2 mt-2">
+                                        <button type="button" class="quick-expiry bg-gray-200 px-2 py-1 rounded" data-days="7">1 Week</button>
+                                        <button type="button" class="quick-expiry bg-gray-200 px-2 py-1 rounded" data-days="15">15 Days</button>
+                                        <button type="button" class="quick-expiry bg-gray-200 px-2 py-1 rounded" data-days="30">1 Month</button>
+                                    </div>
+                                    <x-input-error :messages="$errors->get('expiry_date')" class="mt-2" />
+                                </div>
+                            @endif
 
                             <!-- Photos -->
                             <div class="md:col-span-2">
@@ -100,4 +123,26 @@
             </div>
         </div>
     </div>
-</x-app-layout> 
+</x-app-layout>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function toggleExpiryField() {
+        const orderType = document.getElementById('order_type').value;
+        document.getElementById('expiry_date_field').style.display = (orderType === 'subscription' || orderType === 'custom') ? '' : 'none';
+    }
+    document.getElementById('order_type').addEventListener('change', toggleExpiryField);
+    toggleExpiryField();
+    document.querySelectorAll('.quick-expiry').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const days = parseInt(this.getAttribute('data-days'));
+            const today = new Date();
+            today.setDate(today.getDate() + days);
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            document.getElementById('expiry_date').value = `${yyyy}-${mm}-${dd}`;
+        });
+    });
+});
+</script> 

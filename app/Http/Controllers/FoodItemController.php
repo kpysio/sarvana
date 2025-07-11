@@ -20,9 +20,13 @@ class FoodItemController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        return view('food-items.create');
+        $clone = null;
+        if ($request->has('clone_id')) {
+            $clone = FoodItem::where('provider_id', auth()->id())->find($request->input('clone_id'));
+        }
+        return view('food-items.create', compact('clone'));
     }
 
     /**
@@ -39,11 +43,18 @@ class FoodItemController extends Controller
             'available_date' => 'required|date|after_or_equal:today',
             'available_time' => 'required',
             'pickup_address' => 'required|string',
+            'order_type' => 'required|in:daily,subscription,custom',
+            'expiry_date' => 'nullable|date|after_or_equal:today',
             'photos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $validated['provider_id'] = auth()->id();
         $validated['status'] = 'active';
+
+        // If daily, set expiry_date to available_date
+        if ($validated['order_type'] === 'daily') {
+            $validated['expiry_date'] = $validated['available_date'];
+        }
 
         // Handle photo uploads
         if ($request->hasFile('photos')) {
@@ -95,8 +106,15 @@ class FoodItemController extends Controller
             'available_time' => 'required',
             'pickup_address' => 'required|string',
             'status' => 'required|in:active,inactive,sold_out',
+            'order_type' => 'required|in:daily,subscription,custom',
+            'expiry_date' => 'nullable|date|after_or_equal:today',
             'photos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+
+        // If daily, set expiry_date to available_date
+        if ($validated['order_type'] === 'daily') {
+            $validated['expiry_date'] = $validated['available_date'];
+        }
 
         // Handle photo uploads
         if ($request->hasFile('photos')) {
@@ -130,5 +148,41 @@ class FoodItemController extends Controller
         $foodItem->delete();
 
         return redirect()->route('food-items.index')->with('success', 'Food item deleted successfully!');
+    }
+
+    public function clone(FoodItem $foodItem)
+    {
+        $this->authorize('update', $foodItem);
+        return redirect()->route('food-items.create', ['clone_id' => $foodItem->id]);
+    }
+
+    public function reactivate(FoodItem $foodItem)
+    {
+        $this->authorize('update', $foodItem);
+        $foodItem->status = 'active';
+        // Optionally extend expiry to tomorrow if already expired
+        if ($foodItem->isExpired()) {
+            $foodItem->expiry_date = now()->addDay();
+        }
+        $foodItem->save();
+        return back()->with('success', 'Food item reactivated!');
+    }
+
+    public function extendExpiry(Request $request, FoodItem $foodItem)
+    {
+        $this->authorize('update', $foodItem);
+        $request->validate(['days' => 'required|integer|min:1|max:365']);
+        $foodItem->expiry_date = $foodItem->expiry_date ? \Carbon\Carbon::parse($foodItem->expiry_date)->addDays($request->days) : now()->addDays($request->days);
+        $foodItem->status = 'active';
+        $foodItem->save();
+        return back()->with('success', 'Expiry extended!');
+    }
+
+    public function markSoldOut(FoodItem $foodItem)
+    {
+        $this->authorize('update', $foodItem);
+        $foodItem->status = 'sold_out';
+        $foodItem->save();
+        return back()->with('success', 'Food item marked as sold out!');
     }
 }

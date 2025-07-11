@@ -21,6 +21,8 @@ class FoodItem extends Model
         'pickup_address',
         'photos',
         'status',
+        'order_type',
+        'expiry_date',
     ];
 
     protected $casts = [
@@ -28,6 +30,7 @@ class FoodItem extends Model
         'available_date' => 'date',
         'available_time' => 'datetime',
         'photos' => 'array',
+        'expiry_date' => 'date',
     ];
 
     // Relationships
@@ -51,6 +54,17 @@ class FoodItem extends Model
         return $this->belongsToMany(Tag::class, 'food_item_tags');
     }
 
+    public function isExpired()
+    {
+        if ($this->order_type === 'daily') {
+            return $this->available_date->isPast();
+        }
+        if ($this->expiry_date) {
+            return $this->expiry_date->isPast();
+        }
+        return false;
+    }
+
     // Scopes
     public function scopeActive($query)
     {
@@ -66,5 +80,25 @@ class FoodItem extends Model
     {
         return $query->where('status', 'active')
                     ->where('available_quantity', '>', 0);
+    }
+
+    public function scopeExpiringSoon($query)
+    {
+        $tomorrow = now()->addDay()->startOfDay();
+        $end = now()->addDay()->endOfDay();
+        return $query->where('status', 'active')
+            ->where(function($q) use ($tomorrow, $end) {
+                $q->where(function($q2) use ($tomorrow, $end) {
+                    $q2->where('order_type', 'daily')
+                        ->where('available_date', '>=', $tomorrow)
+                        ->where('available_date', '<=', $end);
+                })
+                ->orWhere(function($q2) use ($tomorrow, $end) {
+                    $q2->whereIn('order_type', ['subscription', 'custom'])
+                        ->whereNotNull('expiry_date')
+                        ->where('expiry_date', '>=', $tomorrow)
+                        ->where('expiry_date', '<=', $end);
+                });
+            });
     }
 }

@@ -10,7 +10,7 @@ class Tag extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'category', 'color', 'icon', 'is_active',
+        'name', 'category', 'color', 'icon', 'is_active', 'description',
     ];
 
     public function foodItems()

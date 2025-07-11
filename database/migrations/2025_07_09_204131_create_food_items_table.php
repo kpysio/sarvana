@@ -24,6 +24,8 @@ return new class extends Migration
             $table->text('pickup_address');
             $table->json('photos')->nullable();
             $table->enum('status', ['active', 'inactive', 'sold_out'])->default('active');
+            $table->enum('order_type', ['daily', 'subscription', 'custom'])->default('daily');
+            $table->date('expiry_date')->nullable();
             $table->timestamps();
         });
     }

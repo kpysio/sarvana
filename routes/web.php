@@ -6,6 +6,13 @@ use App\Http\Controllers\FoodItemController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\ReportsController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\TagController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -18,6 +25,9 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['au
 Route::middleware(['auth', 'provider', 'active.membership'])->group(function () {
     Route::get('/provider/dashboard', [DashboardController::class, 'index'])->name('provider.dashboard');
     Route::resource('food-items', FoodItemController::class, ['except' => ['show']]);
+    Route::post('food-items/{foodItem}/reactivate', [FoodItemController::class, 'reactivate'])->name('food-items.reactivate');
+    Route::post('food-items/{foodItem}/extend-expiry', [FoodItemController::class, 'extendExpiry'])->name('food-items.extendExpiry');
+    Route::post('food-items/{foodItem}/mark-sold-out', [FoodItemController::class, 'markSoldOut'])->name('food-items.markSoldOut');
     Route::get('/provider/onboarding', function () {
         return view('provider.onboarding');
     })->name('provider.onboarding');
@@ -58,6 +68,74 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/notifications/{id}/read', function(Request $request, $id) {
+        $notification = $request->user()->notifications()->findOrFail($id);
+        $notification->markAsRead();
+        return back();
+    })->name('notifications.markAsRead');
+    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+});
+
+// Admin routes
+Route::middleware(['auth'])->group(function () {
+    // Admin dashboard
+    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    
+    // Admin reports
+    Route::prefix('admin/reports')->name('admin.reports.')->group(function () {
+        Route::get('/', [ReportsController::class, 'index'])->name('index');
+        Route::get('/sales', [ReportsController::class, 'sales'])->name('sales');
+        Route::get('/users', [ReportsController::class, 'users'])->name('users');
+        Route::get('/providers', [ReportsController::class, 'providers'])->name('providers');
+        Route::get('/orders', [ReportsController::class, 'orders'])->name('orders');
+    });
+    
+    // Admin user management
+    Route::prefix('admin/users')->name('admin.users.')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('/{user}', [UserController::class, 'show'])->name('show');
+        Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
+        Route::patch('/{user}', [UserController::class, 'update'])->name('update');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+        Route::post('/{user}/approve', [UserController::class, 'approveProvider'])->name('approve');
+        Route::post('/{user}/reject', [UserController::class, 'rejectProvider'])->name('reject');
+        Route::post('/{user}/reset-password', [UserController::class, 'resetPassword'])->name('reset-password');
+        Route::post('/{user}/deactivate', [UserController::class, 'deactivateAccount'])->name('deactivate');
+        Route::post('/{user}/reactivate', [UserController::class, 'reactivateAccount'])->name('reactivate');
+        Route::post('/bulk-action', [UserController::class, 'bulkAction'])->name('bulk-action');
+    });
+    
+    // Admin tag management
+    Route::prefix('admin/tags')->name('admin.tags.')->group(function () {
+        Route::get('/', [TagController::class, 'index'])->name('index');
+        Route::get('/create', [TagController::class, 'create'])->name('create');
+        Route::post('/', [TagController::class, 'store'])->name('store');
+        Route::get('/{tag}', [TagController::class, 'show'])->name('show');
+        Route::get('/{tag}/edit', [TagController::class, 'edit'])->name('edit');
+        Route::patch('/{tag}', [TagController::class, 'update'])->name('update');
+        Route::delete('/{tag}', [TagController::class, 'destroy'])->name('destroy');
+        Route::post('/bulk-action', [TagController::class, 'bulkAction'])->name('bulk-action');
+    });
+    
+    // Admin category management
+    Route::prefix('admin/categories')->name('admin.categories.')->group(function () {
+        Route::get('/', [CategoryController::class, 'index'])->name('index');
+        Route::get('/{category}', [CategoryController::class, 'show'])->name('show');
+        Route::patch('/{category}', [CategoryController::class, 'update'])->name('update');
+        Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
+        Route::post('/{category}/merge', [CategoryController::class, 'merge'])->name('merge');
+        Route::post('/bulk-action', [CategoryController::class, 'bulkAction'])->name('bulk-action');
+    });
+    
+    // Admin order management
+    Route::prefix('admin/orders')->name('admin.orders.')->group(function () {
+        Route::get('/', [AdminOrderController::class, 'index'])->name('index');
+        Route::get('/analytics', [AdminOrderController::class, 'analytics'])->name('analytics');
+        Route::get('/{order}', [AdminOrderController::class, 'show'])->name('show');
+        Route::patch('/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('update-status');
+        Route::post('/bulk-update-status', [AdminOrderController::class, 'bulkUpdateStatus'])->name('bulk-update-status');
+        Route::get('/export', [AdminOrderController::class, 'export'])->name('export');
+    });
 });
 
 require __DIR__.'/auth.php';

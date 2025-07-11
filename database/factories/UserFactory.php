@@ -31,7 +31,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => bcrypt('abc1234'), // Master password
             'remember_token' => Str::random(10),
-            'user_type' => fake()->randomElement(['customer', 'provider']),
+            'user_type' => fake()->randomElement(['customer', 'provider', 'admin']),
             'phone' => fake()->phoneNumber(),
             'postcode' => fake()->randomElement(['M1 1AA', 'M2 2BB', 'M3 3CC', 'M4 4DD', 'M5 5EE', 'M6 6FF', 'M7 7GG', 'M8 8HH']),
             'address' => fake()->address(),
@@ -52,6 +52,22 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is an admin.
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'user_type' => 'admin',
+            'membership_status' => 'active',
+            'membership_expires_at' => fake()->dateTimeBetween('now', '+1 year'),
+            'is_verified' => true,
+            'bio' => 'System administrator for Sarvana marketplace',
+            'rating' => 0,
+            'total_reviews' => 0,
         ]);
     }
 

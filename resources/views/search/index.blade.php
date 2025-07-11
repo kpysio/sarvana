@@ -254,21 +254,27 @@
                                 @endif
                             </div>
                             <!-- Food Image -->
-                            <div class="aspect-w-16 aspect-h-9 rounded-t-lg overflow-hidden">
-                                @if($item->photos && is_array($item->photos) && count($item->photos) > 0 && $item->photos[0])
-                                    <img 
-                                        src="{{ $item->photos[0] }}" 
-                                        alt="{{ $item->title }}"
-                                        class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-200"
-                                    >
-                                @else
-                                    <img 
-                                        src="https://placehold.co/400x300/orange/fff?text=No+Photo" 
-                                        alt="No Photo"
-                                        class="w-full h-48 object-cover"
-                                    >
-                                @endif
-                            </div>
+                            @php
+                                $photos = $item->photos;
+                                if (is_string($photos)) {
+                                    $photos = json_decode($photos, true);
+                                }
+                                if (!is_array($photos)) {
+                                    $photos = [];
+                                }
+                            @endphp
+                            @if(count($photos) > 0)
+                                @php
+                                    $photo = $photos[0];
+                                    $isUrl = Str::startsWith($photo, ['http://', 'https://']);
+                                    $src = $isUrl ? $photo : asset('storage/' . ltrim($photo, '/'));
+                                @endphp
+                                <img src="{{ $src }}" alt="{{ $item->title ?? 'Photo' }}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-200">
+                            @else
+                                <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+                                    <span class="text-gray-400">No Photo</span>
+                                </div>
+                            @endif
                             <!-- Content -->
                             <div class="p-4">
                                 <!-- Tags -->

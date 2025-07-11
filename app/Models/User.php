@@ -107,6 +107,11 @@ class User extends Authenticatable
         return $this->user_type === 'customer';
     }
 
+    public function isAdmin()
+    {
+        return $this->user_type === 'admin';
+    }
+
     public function hasActiveMembership()
     {
         return $this->membership_status === 'active' && 

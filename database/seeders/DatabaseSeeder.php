@@ -28,14 +28,10 @@ class DatabaseSeeder extends Seeder
         \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         // Create admin user
-        User::factory()->create([
+        User::factory()->admin()->create([
             'name' => 'Admin User',
             'email' => 'admin@sarvana.com',
             'password' => bcrypt('abc1234'),
-            'user_type' => 'provider',
-            'membership_status' => 'active',
-            'membership_expires_at' => now()->addYear(),
-            'is_verified' => true,
         ]);
 
         // Create test users

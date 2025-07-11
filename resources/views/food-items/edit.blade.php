@@ -96,8 +96,12 @@
                                     <x-input-label :value="__('Current Photos')" />
                                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
                                         @foreach($foodItem->photos as $photo)
+                                            @php
+                                                $isUrl = Str::startsWith($photo, ['http://', 'https://']);
+                                                $src = $isUrl ? $photo : asset('storage/' . ltrim($photo, '/'));
+                                            @endphp
                                             <div class="relative">
-                                                <img src="{{ $photo }}" alt="Food item photo" class="w-full h-24 object-cover rounded-lg">
+                                                <img src="{{ $src }}" alt="Food item photo" class="w-full h-24 object-cover rounded-lg">
                                             </div>
                                         @endforeach
                                     </div>
@@ -111,6 +115,19 @@
                                 <p class="text-sm text-gray-500 mt-1">You can select multiple photos. Maximum 5MB each.</p>
                                 <x-input-error :messages="$errors->get('photos.*')" class="mt-2" />
                             </div>
+
+                            <!-- Order Type (Provider Only) -->
+                            @if(auth()->user() && auth()->user()->user_type === 'provider')
+                                <div class="md:col-span-2">
+                                    <x-input-label for="order_type" :value="__('Order Type')" />
+                                    <select id="order_type" name="order_type" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                        <option value="daily" {{ old('order_type', $foodItem->order_type ?? 'daily') == 'daily' ? 'selected' : '' }}>Daily (expires end of day)</option>
+                                        <option value="subscription" {{ old('order_type', $foodItem->order_type ?? '') == 'subscription' ? 'selected' : '' }}>Subscription</option>
+                                        <option value="custom" {{ old('order_type', $foodItem->order_type ?? '') == 'custom' ? 'selected' : '' }}>Custom</option>
+                                    </select>
+                                    <x-input-error :messages="$errors->get('order_type')" class="mt-2" />
+                                </div>
+                            @endif
                         </div>
 
                         <div class="flex items-center justify-end mt-6">

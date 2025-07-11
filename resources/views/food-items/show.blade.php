@@ -41,7 +41,11 @@
                 <div class="flex overflow-x-auto snap-x snap-mandatory">
                     @if(count($photos) > 0)
                         @foreach($photos as $i => $photo)
-                            <img src="{{ $photo }}" alt="{{ $foodItem->title ?? 'Photo' }}" class="w-full h-72 object-cover snap-center transition-transform duration-300">
+                            @php
+                                $isUrl = Str::startsWith($photo, ['http://', 'https://']);
+                                $src = $isUrl ? $photo : asset('storage/' . ltrim($photo, '/'));
+                            @endphp
+                            <img src="{{ $src }}" alt="{{ $foodItem->title ?? 'Photo' }}" class="w-full h-72 object-cover snap-center transition-transform duration-300">
                         @endforeach
                     @else
                         <div class="w-full h-72 bg-gray-200 flex items-center justify-center">
@@ -134,14 +138,17 @@
                         @csrf
                         <input type="hidden" name="food_item_id" value="{{ $foodItem->id }}">
                         <input type="hidden" name="provider_id" value="{{ $foodItem->provider_id }}">
-                        <div>
+                        {{-- Order type is set by provider, not selectable by customer --}}
+                        {{-- <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Order Type</label>
                             <select name="order_type" class="w-full border border-gray-300 rounded-md px-3 py-2" required>
                                 <option value="daily">Daily (one-time)</option>
                                 <option value="subscription">Subscription</option>
                                 <option value="custom">Custom</option>
                             </select>
-                        </div>
+                        </div> --}}
+                        {{-- Remove these fields since order type is not selectable by customer --}}
+                        {{--
                         <div class="hidden" id="subscriptionDaysField">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Subscription Days</label>
                             <input type="number" name="subscription_days" min="1" max="30" class="w-full border border-gray-300 rounded-md px-3 py-2">
@@ -150,6 +157,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Custom Order Details</label>
                             <textarea name="custom_details" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
                         </div>
+                        --}}
                         <div class="flex items-center space-x-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
                             <button type="button" class="decrement bg-gray-200 px-2 py-1 rounded-full text-lg">-</button>
@@ -206,7 +214,11 @@
                                         </div>
                                         <div class="text-gray-600 text-sm mt-1">{{ $review->comment ?? '' }}</div>
                                         @if(isset($review->photo) && $review->photo)
-                                            <img src="{{ $review->photo }}" class="w-20 h-20 object-cover rounded mt-2">
+                                            @php
+                                                $isUrl = Str::startsWith($review->photo, ['http://', 'https://']);
+                                                $src = $isUrl ? $review->photo : asset('storage/' . ltrim($review->photo, '/'));
+                                            @endphp
+                                            <img src="{{ $src }}" class="w-20 h-20 object-cover rounded mt-2">
                                         @endif
                                     </div>
                                 </div>
