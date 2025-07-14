@@ -33,30 +33,18 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'user_type' => ['required', 'in:customer,provider'],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'postcode' => ['nullable', 'string', 'max:10'],
-            'address' => ['nullable', 'string'],
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'user_type' => $request->user_type,
-            'phone' => $request->phone,
-            'postcode' => $request->postcode,
-            'address' => $request->address,
+            'user_type' => 'customer',
         ]);
 
         event(new Registered($user));
 
         Auth::login($user);
-
-        // Redirect based on user type
-        if ($user->isProvider()) {
-            return redirect()->route('provider.onboarding')->with('success', 'Welcome! Please complete your provider profile.');
-        }
 
         return redirect(route('dashboard', absolute: false));
     }

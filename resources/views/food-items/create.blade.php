@@ -16,14 +16,14 @@
                             <!-- Title -->
                             <div class="md:col-span-2">
                                 <x-input-label for="title" :value="__('Title')" />
-                                <x-text-input id="title" class="block mt-1 w-full" type="text" name="title" :value="old('title', $clone->title ?? '')" required />
+                                <x-text-input id="title" class="block mt-1 w-full" type="text" name="title" :value="old('title', isset($clone) ? $clone->title : '')" required />
                                 <x-input-error :messages="$errors->get('title')" class="mt-2" />
                             </div>
 
                             <!-- Description -->
                             <div class="md:col-span-2">
                                 <x-input-label for="description" :value="__('Description')" />
-                                <textarea id="description" name="description" rows="4" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>{{ old('description', $clone->description ?? '') }}</textarea>
+                                <textarea id="description" name="description" rows="4" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>{{ old('description', isset($clone) ? $clone->description : '') }}</textarea>
                                 <x-input-error :messages="$errors->get('description')" class="mt-2" />
                             </div>
 
@@ -32,13 +32,13 @@
                                 <x-input-label for="category" :value="__('Category')" />
                                 <select id="category" name="category" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                                     <option value="">Select Category</option>
-                                    <option value="burger" {{ old('category', $clone->category ?? '') == 'burger' ? 'selected' : '' }}>Burger</option>
-                                    <option value="tiffin" {{ old('category', $clone->category ?? '') == 'tiffin' ? 'selected' : '' }}>Tiffin</option>
-                                    <option value="cake" {{ old('category', $clone->category ?? '') == 'cake' ? 'selected' : '' }}>Cake</option>
-                                    <option value="snacks" {{ old('category', $clone->category ?? '') == 'snacks' ? 'selected' : '' }}>Snacks</option>
-                                    <option value="biryani" {{ old('category', $clone->category ?? '') == 'biryani' ? 'selected' : '' }}>Biryani</option>
-                                    <option value="sweets" {{ old('category', $clone->category ?? '') == 'sweets' ? 'selected' : '' }}>Sweets</option>
-                                    <option value="other" {{ old('category', $clone->category ?? '') == 'other' ? 'selected' : '' }}>Other</option>
+                                    <option value="burger" {{ old('category', isset($clone) ? $clone->category : '') == 'burger' ? 'selected' : '' }}>Burger</option>
+                                    <option value="tiffin" {{ old('category', isset($clone) ? $clone->category : '') == 'tiffin' ? 'selected' : '' }}>Tiffin</option>
+                                    <option value="cake" {{ old('category', isset($clone) ? $clone->category : '') == 'cake' ? 'selected' : '' }}>Cake</option>
+                                    <option value="snacks" {{ old('category', isset($clone) ? $clone->category : '') == 'snacks' ? 'selected' : '' }}>Snacks</option>
+                                    <option value="biryani" {{ old('category', isset($clone) ? $clone->category : '') == 'biryani' ? 'selected' : '' }}>Biryani</option>
+                                    <option value="sweets" {{ old('category', isset($clone) ? $clone->category : '') == 'sweets' ? 'selected' : '' }}>Sweets</option>
+                                    <option value="other" {{ old('category', isset($clone) ? $clone->category : '') == 'other' ? 'selected' : '' }}>Other</option>
                                 </select>
                                 <x-input-error :messages="$errors->get('category')" class="mt-2" />
                             </div>
@@ -46,35 +46,35 @@
                             <!-- Price -->
                             <div>
                                 <x-input-label for="price" :value="__('Price (₹)')" />
-                                <x-text-input id="price" class="block mt-1 w-full" type="number" name="price" :value="old('price', $clone->price ?? '')" step="0.01" min="0" required />
+                                <x-text-input id="price" class="block mt-1 w-full" type="number" name="price" :value="old('price', isset($clone) ? $clone->price : '')" step="0.01" min="0" required />
                                 <x-input-error :messages="$errors->get('price')" class="mt-2" />
                             </div>
 
                             <!-- Available Quantity -->
                             <div>
                                 <x-input-label for="available_quantity" :value="__('Available Quantity')" />
-                                <x-text-input id="available_quantity" class="block mt-1 w-full" type="number" name="available_quantity" :value="old('available_quantity', $clone->available_quantity ?? '')" min="1" required />
+                                <x-text-input id="available_quantity" class="block mt-1 w-full" type="number" name="available_quantity" :value="old('available_quantity', isset($clone) ? $clone->available_quantity : '')" min="1" required />
                                 <x-input-error :messages="$errors->get('available_quantity')" class="mt-2" />
                             </div>
 
                             <!-- Available Date -->
                             <div>
                                 <x-input-label for="available_date" :value="__('Available Date')" />
-                                <x-text-input id="available_date" class="block mt-1 w-full" type="date" name="available_date" :value="old('available_date', $clone->available_date ? $clone->available_date->format('Y-m-d') : '')" required />
+                                <x-text-input id="available_date" class="block mt-1 w-full" type="date" name="available_date" :value="old('available_date', isset($clone) && $clone->available_date ? $clone->available_date->format('Y-m-d') : '')" required />
                                 <x-input-error :messages="$errors->get('available_date')" class="mt-2" />
                             </div>
 
                             <!-- Available Time -->
                             <div>
                                 <x-input-label for="available_time" :value="__('Available Time')" />
-                                <x-text-input id="available_time" class="block mt-1 w-full" type="time" name="available_time" :value="old('available_time', $clone->available_time ? \Carbon\Carbon::parse($clone->available_time)->format('H:i') : '')" required />
+                                <x-text-input id="available_time" class="block mt-1 w-full" type="time" name="available_time" :value="old('available_time', isset($clone) && $clone->available_time ? \Carbon\Carbon::parse($clone->available_time)->format('H:i') : '')" required />
                                 <x-input-error :messages="$errors->get('available_time')" class="mt-2" />
                             </div>
 
                             <!-- Pickup Address -->
                             <div class="md:col-span-2">
                                 <x-input-label for="pickup_address" :value="__('Pickup Address')" />
-                                <textarea id="pickup_address" name="pickup_address" rows="3" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>{{ old('pickup_address', $clone->pickup_address ?? '') }}</textarea>
+                                <textarea id="pickup_address" name="pickup_address" rows="3" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>{{ old('pickup_address', isset($clone) ? $clone->pickup_address : '') }}</textarea>
                                 <x-input-error :messages="$errors->get('pickup_address')" class="mt-2" />
                             </div>
 
@@ -83,9 +83,9 @@
                                 <div class="md:col-span-2">
                                     <x-input-label for="order_type" :value="__('Order Type')" />
                                     <select id="order_type" name="order_type" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
-                                        <option value="daily" {{ old('order_type', $clone->order_type ?? 'daily') == 'daily' ? 'selected' : '' }}>Daily (expires end of day)</option>
-                                        <option value="subscription" {{ old('order_type', $clone->order_type ?? '') == 'subscription' ? 'selected' : '' }}>Subscription</option>
-                                        <option value="custom" {{ old('order_type', $clone->order_type ?? '') == 'custom' ? 'selected' : '' }}>Custom</option>
+                                        <option value="daily" {{ old('order_type', isset($clone) ? $clone->order_type : 'daily') == 'daily' ? 'selected' : '' }}>Daily (expires end of day)</option>
+                                        <option value="subscription" {{ old('order_type', isset($clone) ? $clone->order_type : '') == 'subscription' ? 'selected' : '' }}>Subscription</option>
+                                        <option value="custom" {{ old('order_type', isset($clone) ? $clone->order_type : '') == 'custom' ? 'selected' : '' }}>Custom</option>
                                     </select>
                                     <x-input-error :messages="$errors->get('order_type')" class="mt-2" />
                                 </div>

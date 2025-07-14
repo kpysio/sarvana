@@ -292,10 +292,10 @@
                                 <div class="flex items-center gap-2 mb-3">
                                     <div class="flex items-center">
                                         <span class="text-yellow-400">⭐</span>
-                                        <span class="text-sm text-gray-600 ml-1">{{ number_format($item->provider->rating, 1) }}</span>
+                                        <span class="text-sm text-gray-600 ml-1">{{ $item->provider ? number_format($item->provider->rating, 1) : '-' }}</span>
                                     </div>
                                     <span class="text-gray-300">•</span>
-                                    <span class="text-sm text-gray-600">{{ $item->provider->name }}</span>
+                                    <span class="text-sm text-gray-600">{{ $item->provider ? $item->provider->name : 'Unknown' }}</span>
                                 </div>
                                 <!-- Price & Availability -->
                                 <div class="flex items-center justify-between">

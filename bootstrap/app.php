@@ -19,6 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'provider' => \App\Http\Middleware\ProviderMiddleware::class,
             'customer' => \App\Http\Middleware\CustomerMiddleware::class,
             'active.membership' => \App\Http\Middleware\ActiveMembershipMiddleware::class,
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

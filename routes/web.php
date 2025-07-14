@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Auth\ProviderRegisterController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -34,16 +35,19 @@ Route::middleware(['auth', 'provider', 'active.membership'])->group(function () 
 });
 
 // Customer routes
-Route::middleware(['auth', 'customer'])->group(function () {
+// Remove the auth middleware from /search routes to make them public
+Route::middleware(['auth'])->group(function () {
     Route::get('/customer/dashboard', [DashboardController::class, 'index'])->name('customer.dashboard');
-    Route::get('/search', [SearchController::class, 'index'])->name('search.index');
-    Route::get('/search/{foodItem}', [SearchController::class, 'show'])->name('search.show');
-    Route::get('/search/providers', [SearchController::class, 'providers'])->name('search.providers');
-    Route::get('/search/providers/{provider}', [SearchController::class, 'provider'])->name('search.provider');
 });
 
-// Public food item detail route
-Route::get('/food-items/{foodItem}', [FoodItemController::class, 'show'])->name('food-items.show');
+// Public search routes
+Route::get('/search', [SearchController::class, 'index'])->name('search.index');
+Route::get('/search/{foodItem}', [SearchController::class, 'show'])->name('search.show');
+Route::get('/search/providers', [SearchController::class, 'providers'])->name('search.providers');
+Route::get('/search/providers/{provider}', [SearchController::class, 'provider'])->name('search.provider');
+
+// Protect food item detail route
+Route::get('/food-items/{foodItem}', [FoodItemController::class, 'show'])->middleware('auth')->name('food-items.show');
 
 // Order routes (accessible by both customers and providers)
 Route::middleware('auth')->group(function () {
@@ -137,5 +141,28 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/export', [AdminOrderController::class, 'export'])->name('export');
     });
 });
+
+// Admin food item management
+Route::prefix('admin/food-items')->middleware(['auth', 'admin'])->name('admin.food-items.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Admin\FoodItemController::class, 'index'])->name('index');
+    Route::get('/{foodItem}', [\App\Http\Controllers\Admin\FoodItemController::class, 'show'])->name('show');
+    // Add more routes as needed (edit, update, etc.)
+});
+
+// Admin Notifications
+Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
+    Route::get('notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('admin.notifications.index');
+    Route::get('notifications/{notification}', [\App\Http\Controllers\Admin\NotificationController::class, 'show'])->name('admin.notifications.show');
+    Route::post('notifications/mark-all-read', [\App\Http\Controllers\Admin\NotificationController::class, 'markAllRead'])->name('admin.notifications.markAllRead');
+    // Profile/Settings
+    Route::get('profile', [\App\Http\Controllers\Admin\ProfileController::class, 'show'])->name('profile.show');
+    Route::get('settings', [\App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings');
+    Route::get('providers/pending', [\App\Http\Controllers\Admin\ProviderApprovalController::class, 'index'])->name('admin.providers.pending');
+    Route::post('providers/{id}/approve', [\App\Http\Controllers\Admin\ProviderApprovalController::class, 'approve'])->name('admin.providers.approve');
+    Route::post('providers/{id}/reject', [\App\Http\Controllers\Admin\ProviderApprovalController::class, 'reject'])->name('admin.providers.reject');
+});
+
+Route::get('/register/provider', [ProviderRegisterController::class, 'show'])->name('register.provider');
+Route::post('/register/provider', [ProviderRegisterController::class, 'register']);
 
 require __DIR__.'/auth.php';

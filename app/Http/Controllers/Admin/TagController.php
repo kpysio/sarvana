@@ -11,26 +11,22 @@ class TagController extends Controller
     public function index(Request $request)
     {
         $query = Tag::query();
-        
-        // Search by name
+
         if ($request->filled('search')) {
-            $query->where('name', 'like', "%{$request->search}%");
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('description', 'like', '%' . $request->search . '%');
+            });
         }
-        
-        // Filter by category
+
         if ($request->filled('category')) {
             $query->where('category', $request->category);
         }
-        
-        $tags = $query->withCount('foodItems')->orderBy('name')->paginate(20);
-        
-        // Get available categories for filter
-        $categories = Tag::select('category')->distinct()->pluck('category');
 
-        // For client-side filtering, pass all tags as JSON
-        $allTags = Tag::withCount('foodItems')->orderBy('name')->get();
+        $tags = $query->orderBy('name')->paginate(15)->withQueryString();
+        $categories = Tag::distinct()->pluck('category')->filter()->unique()->values();
 
-        return view('admin.tags.index', compact('tags', 'categories', 'allTags'));
+        return view('admin.tags.index', compact('tags', 'categories'));
     }
 
     public function create()
