@@ -48,6 +48,11 @@ class FoodItemController extends Controller
             'photos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
+        // Fallback: if available_date is missing, set to today
+        if (empty($validated['available_date'])) {
+            $validated['available_date'] = date('Y-m-d');
+        }
+
         $validated['provider_id'] = auth()->id();
         $validated['status'] = 'active';
 

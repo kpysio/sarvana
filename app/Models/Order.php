@@ -51,6 +51,23 @@ class Order extends Model
     public function isCancelled() { return $this->status === self::STATUS_CANCELLED; }
     public function isRejected() { return $this->status === self::STATUS_REJECTED; }
 
+    /**
+     * Get all statuses for the provider order board (in desired order).
+     */
+    public static function boardStatuses()
+    {
+        return [
+            self::STATUS_PENDING,
+            self::STATUS_ACCEPTED,
+            self::STATUS_PREPARING,
+            self::STATUS_READY,
+            self::STATUS_COLLECTED,
+            self::STATUS_COMPLETED,
+            self::STATUS_CANCELLED,
+            self::STATUS_REJECTED,
+        ];
+    }
+
     // Relationships
     public function customer()
     {

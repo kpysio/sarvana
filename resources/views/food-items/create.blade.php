@@ -49,13 +49,13 @@
                     <!-- Available Date -->
                     <div>
                         <x-input-label for="available_date" :value="__('Available Date')" />
-                        <x-text-input id="available_date" class="block mt-1 w-full" type="date" name="available_date" :value="old('available_date', isset($clone) && $clone->available_date ? $clone->available_date->format('Y-m-d') : '')" required />
+                        <x-text-input id="available_date" class="block mt-1 w-full" type="date" name="available_date" :value="old('available_date', isset($clone) && $clone->available_date ? $clone->available_date->format('Y-m-d') : date('Y-m-d'))" required />
                         <x-input-error :messages="$errors->get('available_date')" class="mt-2" />
                     </div>
                     <!-- Available Time -->
                     <div>
                         <x-input-label for="available_time" :value="__('Ready for Pickup Time')" />
-                        <x-text-input id="available_time" class="block mt-1 w-full" type="time" name="available_time" :value="old('available_time', isset($clone) && $clone->available_time ? \Carbon\Carbon::parse($clone->available_time)->format('H:i') : '')" required />
+                        <x-text-input id="available_time" class="block mt-1 w-full" type="time" name="available_time" :value="old('available_time', isset($clone) && $clone->available_time ? \Carbon\Carbon::parse($clone->available_time)->format('H:i') : date('H:i'))" required />
                         <x-input-error :messages="$errors->get('available_time')" class="mt-2" />
                     </div>
                     <!-- Pickup Address -->
@@ -77,7 +77,7 @@
                         </div>
                         <div class="md:col-span-2" id="expiry_date_field" style="display:none;">
                             <x-input-label for="expiry_date" :value="__('Expiry Date')" />
-                            <x-text-input id="expiry_date" class="block mt-1 w-full" type="date" name="expiry_date" :value="old('expiry_date', isset($clone) && $clone->expiry_date ? $clone->expiry_date->format('Y-m-d') : '')" />
+                            <x-text-input id="expiry_date" class="block mt-1 w-full" type="date" name="expiry_date" :value="old('expiry_date', isset($clone) && $clone->expiry_date ? $clone->expiry_date->format('Y-m-d') : date('Y-m-d', strtotime('+1 day')))" />
                             <div class="flex gap-2 mt-2">
                                 <button type="button" class="quick-expiry bg-gray-200 px-2 py-1 rounded" data-days="7">1 Week</button>
                                 <button type="button" class="quick-expiry bg-gray-200 px-2 py-1 rounded" data-days="15">15 Days</button>

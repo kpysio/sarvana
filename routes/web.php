@@ -115,7 +115,8 @@ Route::middleware(['auth', 'provider'])->prefix('provider')->name('provider.')->
     // Order Management
     Route::get('/orders', [\App\Http\Controllers\Provider\OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [\App\Http\Controllers\Provider\OrderController::class, 'show'])->name('orders.show');
-    Route::put('/orders/{order}/status', [\App\Http\Controllers\Provider\OrderController::class, 'updateStatus'])->name('orders.status');
+    Route::put('/orders/{order}/status', [\App\Http\Controllers\Provider\OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::post('/orders/{order}/add-note', [\App\Http\Controllers\Provider\OrderController::class, 'addNote'])->name('orders.addNote');
 });
 
 // ------------------- CUSTOMER ROUTES -------------------

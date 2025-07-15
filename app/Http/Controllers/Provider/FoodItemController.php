@@ -22,6 +22,7 @@ class FoodItemController extends Controller
         return view('food-items.create');
     }
 
+
     // Store a newly created food item
     public function store(Request $request)
     {
@@ -31,8 +32,20 @@ class FoodItemController extends Controller
             'category' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'available_quantity' => 'required|integer|min:0',
-            'expiry_date' => 'nullable|date',
+            'available_date' => 'required|date|after_or_equal:today',
+            'available_time' => 'required',
+            'pickup_address' => 'required|string',
+            'expiry_date' => 'nullable|date|after_or_equal:today',
+            'photos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+        // Fallback: if available_date is missing, set to today
+        if (empty($validated['available_date'])) {
+            $validated['available_date'] = date('Y-m-d');
+        }
+        // Fallback: if available_time is missing, set to now
+        if (empty($validated['available_time'])) {
+            $validated['available_time'] = date('H:i');
+        }
         $validated['provider_id'] = Auth::id();
         FoodItem::create($validated);
         return redirect()->route('provider.food-items.index')->with('success', 'Food item created successfully!');

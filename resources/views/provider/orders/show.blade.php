@@ -36,6 +36,7 @@
         <h2 class="text-lg font-semibold mb-4">Provider Actions</h2>
         <form method="POST" action="{{ route('provider.orders.updateStatus', $order) }}" class="mb-4">
             @csrf
+            @method('PUT')
             <label class="block text-sm font-medium mb-1">Update Status</label>
             <select name="status" class="border rounded px-2 py-1" required>
                 <option value="accepted" {{ $order->status == 'accepted' ? 'selected' : '' }}>Accepted</option>

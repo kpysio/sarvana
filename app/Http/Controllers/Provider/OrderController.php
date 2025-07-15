@@ -18,8 +18,8 @@ class OrderController extends Controller
             ->whereHas('foodItem', function($q) use ($providerId) {
                 $q->where('provider_id', $providerId);
             })
-            ->latest()
-            ->paginate(20);
+            ->get()
+            ->groupBy('status');
         return view('provider.orders.index', compact('orders'));
     }
 
@@ -27,28 +27,29 @@ class OrderController extends Controller
     {
         $this->authorize('view', $order);
         $order->load(['foodItem', 'customer']);
-        // For AJAX modal: return a view with a <script> tag containing JSON
+        $orderJson = json_encode([
+            'id' => $order->id,
+            'status' => $order->status,
+            'created_at' => $order->created_at->toDateTimeString(),
+            'customer' => $order->customer ? [
+                'id' => $order->customer->id,
+                'name' => $order->customer->name,
+            ] : null,
+            'food_item' => $order->foodItem ? [
+                'id' => $order->foodItem->id,
+                'title' => $order->foodItem->title,
+            ] : null,
+            'quantity' => $order->quantity,
+            'pickup_time' => $order->pickup_time ? $order->pickup_time->toDateTimeString() : null,
+            'customer_notes' => $order->customer_notes,
+        ]);
         if (request()->expectsJson() || request()->ajax()) {
-            return response()->json($order);
+            // Return a minimal HTML with the order-json script tag for modal
+            return response('<script type="application/json" id="order-json">' . $orderJson . '</script>');
         }
         return view('provider.orders.show', [
             'order' => $order,
-            'orderJson' => json_encode([
-                'id' => $order->id,
-                'status' => $order->status,
-                'created_at' => $order->created_at->toDateTimeString(),
-                'customer' => $order->customer ? [
-                    'id' => $order->customer->id,
-                    'name' => $order->customer->name,
-                ] : null,
-                'food_item' => $order->foodItem ? [
-                    'id' => $order->foodItem->id,
-                    'title' => $order->foodItem->title,
-                ] : null,
-                'quantity' => $order->quantity,
-                'pickup_time' => $order->pickup_time ? $order->pickup_time->toDateTimeString() : null,
-                'customer_notes' => $order->customer_notes,
-            ]),
+            'orderJson' => $orderJson,
         ]);
     }
 

@@ -1,7 +1,10 @@
 @extends('layouts.provider')
 
 @section('content')
-<div class="max-w-7xl mx-auto mt-8 font-sans" x-data="orderBoard()">
+<!-- Add SortableJS and canvas-confetti CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<div class="max-w-7xl mx-auto mt-8 font-sans">
     <div class="flex flex-col md:flex-row gap-4 overflow-x-auto">
         @php
             $statuses = [
@@ -42,7 +45,7 @@
                                 <svg class="w-4 h-4 mr-1 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 4h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2z" /></svg>
                                 {{ $order->created_at->diffForHumans() }}
                             </div>
-                            <button @click="showOrder({{ $order->id }})" class="mt-3 text-blue-600 hover:underline text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 rounded transition">Details</button>
+                            <button @click="window.dispatchEvent(new CustomEvent('open-order-modal', { detail: {{ $order->id }} }))" class="mt-3 text-blue-600 hover:underline text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 rounded transition">Details</button>
                         </div>
                     @endforeach
                 @endif
@@ -51,7 +54,7 @@
         @endforeach
     </div>
     <!-- Order Details Modal -->
-    <div x-show="modalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 transition-opacity duration-200">
+    <div x-data="orderBoard()" x-init="window.addEventListener('open-order-modal', e => { showOrder(e.detail); });" x-show="modalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 transition-opacity duration-200">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-2 p-6 relative animate-fade-in" @click.away="closeModal()" @keydown.escape.window="closeModal()" tabindex="0">
             <button @click="closeModal()" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 focus:outline-none">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -123,43 +126,77 @@ function orderBoard() {
             this.modalOpen = false;
         },
         init() {
-            document.querySelectorAll('.order-column .space-y-3').forEach(column => {
-                new Sortable(column, {
-                    group: 'orders',
-                    animation: 150,
-                    ghostClass: 'sortable-ghost',
-                    onEnd: (evt) => {
-                        const orderId = evt.item.dataset.orderId;
-                        const newStatus = evt.to.parentElement.dataset.status;
-                        evt.item.classList.add('opacity-50');
-                        fetch(`/provider/orders/${orderId}/status`, {
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
-                                'Accept': 'application/json',
-                            },
-                            body: JSON.stringify({ status: newStatus })
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            evt.item.classList.remove('opacity-50');
-                            if (!data.success) {
-                                alert('Failed to update order status.');
-                            }
-                        })
-                        .catch(() => {
-                            evt.item.classList.remove('opacity-50');
-                            alert('Failed to update order status.');
-                        });
-                    }
-                });
-            });
+            // This function is no longer needed as SortableJS is initialized in the Blade template
         }
     }
 }
 document.addEventListener('alpine:init', () => {
     Alpine.data('orderBoard', orderBoard);
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.order-column .space-y-3').forEach(column => {
+        new Sortable(column, {
+            group: 'orders',
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            onEnd: function (evt) {
+                const orderId = evt.item.dataset.orderId;
+                const newStatus = evt.to.parentElement.dataset.status;
+                evt.item.classList.add('opacity-50');
+                fetch(`/provider/orders/${orderId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    evt.item.classList.remove('opacity-50');
+                    if (!data.success) {
+                        alert('Failed to update order status.');
+                    } else {
+                        // Move the card to the new column in the DOM
+                        const targetColumn = document.querySelector(`.order-column[data-status='${newStatus}'] .space-y-3`);
+                        if (targetColumn && evt.item.parentElement !== targetColumn) {
+                            targetColumn.appendChild(evt.item);
+                        }
+                        // Update the status label and color in the card
+                        const statusLabels = {
+                            'pending':  { label: 'New Orders', bg: 'bg-yellow-50', text: 'text-yellow-700', icon: `{!! $icons['ClockIcon'] !!}` },
+                            'preparing': { label: 'Preparing', bg: 'bg-blue-50', text: 'text-blue-700', icon: `{!! $icons['FireIcon'] !!}` },
+                            'ready':     { label: 'Ready', bg: 'bg-green-50', text: 'text-green-700', icon: `{!! $icons['CheckCircleIcon'] !!}` },
+                            'completed': { label: 'Completed', bg: 'bg-gray-50', text: 'text-gray-700', icon: `{!! $icons['BadgeCheckIcon'] !!}` },
+                            'cancelled': { label: 'Cancelled', bg: 'bg-red-50', text: 'text-red-700', icon: `{!! $icons['XCircleIcon'] !!}` },
+                        };
+                        const label = statusLabels[newStatus];
+                        if (label) {
+                            const statusSpan = evt.item.querySelector('span.inline-flex');
+                            if (statusSpan) {
+                                statusSpan.className = `inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${label.text} bg-opacity-10 ${label.bg}`;
+                                statusSpan.innerHTML = label.icon + ' ' + label.label;
+                            }
+                        }
+                        if (newStatus === 'completed' && window.confetti) {
+                            confetti({
+                                particleCount: 100,
+                                spread: 70,
+                                origin: { y: 0.6 }
+                            });
+                        }
+                    }
+                })
+                .catch(() => {
+                    evt.item.classList.remove('opacity-50');
+                    alert('Failed to update order status.');
+                });
+            }
+        });
+    });
 });
 </script>
 @endsection 
