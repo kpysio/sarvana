@@ -18,10 +18,15 @@ return new class extends Migration
             $table->foreignId('food_item_id')->constrained()->onDelete('cascade');
             $table->integer('quantity');
             $table->decimal('total_amount', 8, 2);
-            $table->enum('status', ['pending', 'confirmed', 'completed', 'cancelled'])->default('pending');
-            $table->timestamp('pickup_time');
+            $table->enum('status', ['pending', 'accepted', 'preparing', 'ready', 'collected', 'completed', 'cancelled', 'rejected'])->default('pending');
+            $table->timestamp('pickup_time')->nullable();
             $table->text('notes')->nullable();
             $table->text('customer_notes')->nullable();
+            $table->json('history')->nullable();
+            $table->enum('order_type', ['daily', 'subscription', 'custom'])->default('daily');
+            $table->integer('subscription_days')->nullable();
+            $table->text('custom_details')->nullable();
+            $table->string('proof_photo')->nullable();
             $table->timestamps();
         });
     }

@@ -54,7 +54,7 @@
                         <a href="{{ route('profile.edit') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg">
                             Complete Profile
                         </a>
-                        <a href="{{ route('food-items.create') }}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg">
+                        <a href="{{ route('provider.food-items.create') }}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg">
                             Add Food Item
                         </a>
                         <a href="{{ route('dashboard') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg">

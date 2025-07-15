@@ -46,7 +46,7 @@
 
                             <!-- Price -->
                             <div>
-                                <x-input-label for="price" :value="__('Price (₹)')" />
+                                <x-input-label for="price" :value="__('Price (£)')" />
                                 <x-text-input id="price" class="block mt-1 w-full" type="number" name="price" :value="old('price', $foodItem->price)" step="0.01" min="0" required />
                                 <x-input-error :messages="$errors->get('price')" class="mt-2" />
                             </div>
@@ -78,7 +78,7 @@
 
                             <!-- Available Time -->
                             <div>
-                                <x-input-label for="available_time" :value="__('Available Time')" />
+                                <x-input-label for="available_time" :value="__('Ready for Pickup Time')" />
                                 <x-text-input id="available_time" class="block mt-1 w-full" type="time" name="available_time" :value="old('available_time', \Carbon\Carbon::parse($foodItem->available_time)->format('H:i'))" required />
                                 <x-input-error :messages="$errors->get('available_time')" class="mt-2" />
                             </div>

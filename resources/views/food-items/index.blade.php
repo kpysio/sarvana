@@ -6,7 +6,7 @@
             </h2>
             @auth
                 @if(auth()->user()->user_type === 'provider')
-                    <a href="{{ route('food-items.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                    <a href="{{ route('provider.food-items.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
                         Add New Item
                     </a>
                 @endif
@@ -74,7 +74,7 @@
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ ucfirst($item->category) }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">₹{{ $item->price }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">£{{ $item->price }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $item->available_quantity }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
@@ -103,27 +103,27 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <a href="{{ route('food-items.show', $item) }}" class="text-blue-600 hover:text-blue-900 mr-3">View</a>
-                                            <a href="{{ route('food-items.edit', $item) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
-                                            <a href="{{ route('food-items.create', ['clone_id' => $item->id]) }}" class="text-green-600 hover:text-green-900 mr-3">Clone</a>
+                                            <a href="{{ route('provider.food-items.show', $item) }}" class="text-blue-600 hover:text-blue-900 mr-3">View</a>
+                                            <a href="{{ route('provider.food-items.edit', $item) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
+                                            <a href="{{ route('provider.food-items.create', ['clone_id' => $item->id]) }}" class="text-green-600 hover:text-green-900 mr-3">Clone</a>
                                             @if($item->status === 'expired' || $item->status === 'inactive')
-                                                <form action="{{ route('food-items.reactivate', $item) }}" method="POST" class="inline">
+                                                <form action="{{ route('provider.food-items.reactivate', $item) }}" method="POST" class="inline">
                                                     @csrf
                                                     <button type="submit" class="text-blue-600 hover:text-blue-900 mr-2">Reactivate</button>
                                                 </form>
                                             @endif
-                                            <form action="{{ route('food-items.extendExpiry', $item) }}" method="POST" class="inline">
+                                            <form action="{{ route('provider.food-items.extendExpiry', $item) }}" method="POST" class="inline">
                                                 @csrf
                                                 <input type="number" name="days" min="1" max="365" value="7" class="w-14 text-xs border rounded px-1 mr-1" style="height: 1.5em;" />
                                                 <button type="submit" class="text-yellow-600 hover:text-yellow-900 mr-2">Extend</button>
                                             </form>
                                             @if($item->status === 'active')
-                                                <form action="{{ route('food-items.markSoldOut', $item) }}" method="POST" class="inline">
+                                                <form action="{{ route('provider.food-items.markSoldOut', $item) }}" method="POST" class="inline">
                                                     @csrf
                                                     <button type="submit" class="text-red-600 hover:text-red-900">Mark Sold Out</button>
                                                 </form>
                                             @endif
-                                            <form action="{{ route('food-items.destroy', $item) }}" method="POST" class="inline">
+                                            <form action="{{ route('provider.food-items.destroy', $item) }}" method="POST" class="inline">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure you want to delete this item?')">Delete</button>
@@ -139,7 +139,7 @@
             @if($foodItems->isEmpty())
                 <div class="text-center py-12">
                     <p class="text-gray-500 mb-4">You haven't added any food items yet.</p>
-                    <a href="{{ route('food-items.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                    <a href="{{ route('provider.food-items.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
                         Create Your First Item
                     </a>
                 </div>

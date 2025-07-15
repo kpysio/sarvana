@@ -28,6 +28,7 @@ class Order extends Model
     protected $casts = [
         'total_amount' => 'decimal:2',
         'pickup_time' => 'datetime',
+        'history' => 'array',
     ];
 
     // Status constants

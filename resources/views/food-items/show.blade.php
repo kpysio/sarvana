@@ -76,7 +76,7 @@
                     <div>
                         <h1 class="text-3xl font-extrabold text-gray-900 mb-2">{{ $foodItem->title ?? '[No Title]' }}</h1>
                         <div class="flex items-center space-x-2">
-                            <span class="text-lg text-green-600 font-bold">₹{{ $foodItem->price ?? 'N/A' }}</span>
+                            <span class="text-lg text-green-600 font-bold">£{{ $foodItem->price ?? 'N/A' }}</span>
                             <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">{{ $foodItem->available_quantity ?? 0 }} available</span>
                         </div>
                     </div>
@@ -85,6 +85,21 @@
                         <span class="text-xs text-gray-500">Order Deadline</span>
                         <span id="deadline-timer" class="text-lg font-bold text-orange-600">2h 30m left</span>
                     </div>
+                </div>
+                <div class="mb-4 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 rounded">
+                    <strong>Note:</strong> This food will be ready for pickup on
+                    @if(isset($foodItem->available_date) && $foodItem->available_date)
+                        <strong>{{ $foodItem->available_date->format('M d, Y') }}</strong>
+                    @else
+                        <strong>N/A</strong>
+                    @endif
+                    at
+                    @if(isset($foodItem->available_time) && $foodItem->available_time)
+                        <strong>{{ \Carbon\Carbon::parse($foodItem->available_time)->format('g:i A') }}</strong>
+                    @else
+                        <strong>N/A</strong>
+                    @endif
+                    . Please collect your order only after this time.
                 </div>
                 <p class="text-gray-700 mb-4">{{ $foodItem->description ?? '' }}</p>
                 <div class="flex flex-wrap gap-2 mb-4">
@@ -134,64 +149,98 @@
                 </div>
                 <!-- Order Form for Customers -->
                 @if(auth()->user() && method_exists(auth()->user(), 'isCustomer') && auth()->user()->isCustomer())
-                    <form action="{{ route('orders.store') }}" method="POST" class="space-y-4">
+                    <form id="orderForm" action="{{ route('orders.store') }}" method="POST" class="space-y-4">
                         @csrf
                         <input type="hidden" name="food_item_id" value="{{ $foodItem->id }}">
                         <input type="hidden" name="provider_id" value="{{ $foodItem->provider_id }}">
-                        {{-- Order type is set by provider, not selectable by customer --}}
-                        {{-- <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Order Type</label>
-                            <select name="order_type" class="w-full border border-gray-300 rounded-md px-3 py-2" required>
-                                <option value="daily">Daily (one-time)</option>
-                                <option value="subscription">Subscription</option>
-                                <option value="custom">Custom</option>
-                            </select>
-                        </div> --}}
-                        {{-- Remove these fields since order type is not selectable by customer --}}
-                        {{--
-                        <div class="hidden" id="subscriptionDaysField">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Subscription Days</label>
-                            <input type="number" name="subscription_days" min="1" max="30" class="w-full border border-gray-300 rounded-md px-3 py-2">
-                        </div>
-                        <div class="hidden" id="customDetailsField">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Custom Order Details</label>
-                            <textarea name="custom_details" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
-                        </div>
-                        --}}
                         <div class="flex items-center space-x-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
                             <button type="button" class="decrement bg-gray-200 px-2 py-1 rounded-full text-lg">-</button>
-                            <input type="number" name="quantity" min="1" max="{{ $foodItem->available_quantity ?? 1 }}" value="1" class="w-16 border border-gray-300 rounded-md px-3 py-2 text-center" required>
+                            <input type="number" id="quantityInput" name="quantity" min="1" max="{{ $foodItem->available_quantity ?? 1 }}" value="1" class="w-16 border border-gray-300 rounded-md px-3 py-2 text-center" required readonly>
                             <button type="button" class="increment bg-gray-200 px-2 py-1 rounded-full text-lg">+</button>
                             <span class="text-xs text-gray-500">Available: {{ $foodItem->available_quantity ?? 0 }}</span>
                         </div>
+                        <div class="text-sm text-gray-700 mb-2">
+                            <span>Total Price: £<span id="totalPrice">{{ $foodItem->price }}</span></span>
+                        </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Pickup Time</label>
-                            <input type="datetime-local" name="pickup_time" class="w-full border border-gray-300 rounded-md px-3 py-2" required value="{{ isset($foodItem->available_date) && $foodItem->available_date ? $foodItem->available_date->format('Y-m-d') : '' }}T{{ isset($foodItem->available_time) && $foodItem->available_time ? $foodItem->available_time : '' }}">
+                            <div class="text-gray-500 italic">Provider will set pickup time after order is placed.</div>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Special Instructions</label>
                             <textarea name="customer_notes" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
                         </div>
-                        <button type="submit" class="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-semibold py-2 px-4 rounded-md shadow-lg transition-all">Place Order</button>
+                        <button id="placeOrderBtn" type="submit" class="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-semibold py-2 px-4 rounded-md shadow-lg transition-all flex items-center justify-center">
+                            <span id="orderBtnText">Place Order</span>
+                            <svg id="orderLoading" class="hidden animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                        </button>
+                        <div id="orderSuccess" class="hidden mt-2 text-green-600 font-semibold text-center">Order placed successfully!</div>
+                        <div id="orderError" class="hidden mt-2 text-red-600 font-semibold text-center"></div>
                     </form>
                     <script>
-                        // Show/hide subscription/custom fields
                         document.addEventListener('DOMContentLoaded', function() {
-                            const orderType = document.querySelector('select[name=order_type]');
-                            const subField = document.getElementById('subscriptionDaysField');
-                            const customField = document.getElementById('customDetailsField');
-                            orderType.addEventListener('change', function() {
-                                subField.classList.toggle('hidden', this.value !== 'subscription');
-                                customField.classList.toggle('hidden', this.value !== 'custom');
-                            });
-                            // Quantity increment/decrement
-                            const qtyInput = document.querySelector('input[name=quantity]');
+                            const qtyInput = document.getElementById('quantityInput');
+                            const pricePerItem = {{ $foodItem->price ?? 0 }};
+                            const maxQty = {{ $foodItem->available_quantity ?? 1 }};
+                            const totalPrice = document.getElementById('totalPrice');
                             document.querySelector('.increment').onclick = () => {
-                                let v = parseInt(qtyInput.value); if (v < {{ $foodItem->available_quantity ?? 1 }}) qtyInput.value = v+1;
+                                let v = parseInt(qtyInput.value); if (v < maxQty) qtyInput.value = v+1; totalPrice.textContent = (qtyInput.value * pricePerItem).toFixed(2);
                             };
                             document.querySelector('.decrement').onclick = () => {
-                                let v = parseInt(qtyInput.value); if (v > 1) qtyInput.value = v-1;
+                                let v = parseInt(qtyInput.value); if (v > 1) qtyInput.value = v-1; totalPrice.textContent = (qtyInput.value * pricePerItem).toFixed(2);
+                            };
+                            // Prevent manual input
+                            qtyInput.addEventListener('keydown', e => e.preventDefault());
+                            // Order form submission with loading and success/error
+                            const orderForm = document.getElementById('orderForm');
+                            const placeOrderBtn = document.getElementById('placeOrderBtn');
+                            const orderBtnText = document.getElementById('orderBtnText');
+                            const orderLoading = document.getElementById('orderLoading');
+                            const orderSuccess = document.getElementById('orderSuccess');
+                            const orderError = document.getElementById('orderError');
+                            orderForm.onsubmit = function(e) {
+                                e.preventDefault();
+                                orderSuccess.classList.add('hidden');
+                                orderError.classList.add('hidden');
+                                placeOrderBtn.disabled = true;
+                                orderBtnText.textContent = 'Placing...';
+                                orderLoading.classList.remove('hidden');
+                                fetch(orderForm.action, {
+                                    method: 'POST',
+                                    headers: {
+                                        'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value,
+                                        'Accept': 'application/json',
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        food_item_id: {{ $foodItem->id }},
+                                        provider_id: {{ $foodItem->provider_id }},
+                                        quantity: qtyInput.value,
+                                        customer_notes: orderForm.customer_notes.value,
+                                    })
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        orderSuccess.classList.remove('hidden');
+                                        orderForm.reset();
+                                        qtyInput.value = 1;
+                                        totalPrice.textContent = pricePerItem.toFixed(2);
+                                    } else {
+                                        orderError.textContent = data.message || 'Order failed.';
+                                        orderError.classList.remove('hidden');
+                                    }
+                                })
+                                .catch(() => {
+                                    orderError.textContent = 'Order failed. Please try again.';
+                                    orderError.classList.remove('hidden');
+                                })
+                                .finally(() => {
+                                    placeOrderBtn.disabled = false;
+                                    orderBtnText.textContent = 'Place Order';
+                                    orderLoading.classList.add('hidden');
+                                });
                             };
                         });
                     </script>

@@ -9,7 +9,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <form method="POST" action="{{ route('food-items.store') }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ auth()->user() && auth()->user()->user_type === 'provider' ? route('provider.food-items.store') : route('food-items.store') }}" enctype="multipart/form-data">
                         @csrf
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -45,7 +45,7 @@
 
                             <!-- Price -->
                             <div>
-                                <x-input-label for="price" :value="__('Price (₹)')" />
+                                <x-input-label for="price" :value="__('Price (£)')" />
                                 <x-text-input id="price" class="block mt-1 w-full" type="number" name="price" :value="old('price', isset($clone) ? $clone->price : '')" step="0.01" min="0" required />
                                 <x-input-error :messages="$errors->get('price')" class="mt-2" />
                             </div>
@@ -66,7 +66,7 @@
 
                             <!-- Available Time -->
                             <div>
-                                <x-input-label for="available_time" :value="__('Available Time')" />
+                                <x-input-label for="available_time" :value="__('Ready for Pickup Time')" />
                                 <x-text-input id="available_time" class="block mt-1 w-full" type="time" name="available_time" :value="old('available_time', isset($clone) && $clone->available_time ? \Carbon\Carbon::parse($clone->available_time)->format('H:i') : '')" required />
                                 <x-input-error :messages="$errors->get('available_time')" class="mt-2" />
                             </div>
@@ -111,7 +111,7 @@
                         </div>
 
                         <div class="flex items-center justify-end mt-6">
-                            <a href="{{ route('food-items.index') }}" class="text-gray-600 hover:text-gray-800 mr-4">
+                            <a href="{{ route('provider.food-items.index') }}" class="text-gray-600 hover:text-gray-800 mr-4">
                                 Cancel
                             </a>
                             <x-primary-button>

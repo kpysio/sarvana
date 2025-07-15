@@ -41,16 +41,16 @@ class OrderController extends Controller
             'food_item_id' => 'required|exists:food_items,id',
             'provider_id' => 'required|exists:users,id',
             'quantity' => 'required|integer|min:1',
-            'pickup_time' => 'required|date|after:now',
             'customer_notes' => 'nullable|string',
-            'order_type' => 'required|in:daily,subscription,custom',
-            'subscription_days' => 'nullable|integer|min:1',
-            'custom_details' => 'nullable|string',
         ]);
 
         $foodItem = FoodItem::findOrFail($validated['food_item_id']);
         if ($foodItem->status !== 'active' || $foodItem->available_quantity < $validated['quantity']) {
-            return back()->withErrors(['quantity' => 'This item is not available in the requested quantity.']);
+            $msg = ['quantity' => 'This item is not available in the requested quantity.'];
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $msg['quantity']], 422);
+            }
+            return back()->withErrors($msg);
         }
         $totalAmount = $foodItem->price * $validated['quantity'];
 
@@ -61,13 +61,13 @@ class OrderController extends Controller
             'quantity' => $validated['quantity'],
             'total_amount' => $totalAmount,
             'status' => Order::STATUS_PENDING,
-            'pickup_time' => $validated['pickup_time'],
             'customer_notes' => $validated['customer_notes'] ?? null,
-            'order_type' => $validated['order_type'],
-            'subscription_days' => $validated['order_type'] === 'subscription' ? $validated['subscription_days'] : null,
-            'custom_details' => $validated['order_type'] === 'custom' ? $validated['custom_details'] : null,
         ]);
         $foodItem->decrement('available_quantity', $validated['quantity']);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'order_id' => $order->id]);
+        }
         return redirect()->route('orders.show', $order)->with('success', 'Order placed successfully!');
     }
 

@@ -46,7 +46,16 @@ class AuthenticatedSessionController extends Controller
         }
 
         $request->session()->regenerate();
-        return redirect()->intended(RouteServiceProvider::HOME);
+        // Role-based redirect
+        if ($user->user_type === 'provider') {
+            return redirect()->intended('/provider/dashboard');
+        } elseif ($user->user_type === 'customer') {
+            return redirect()->intended('/customer/dashboard');
+        } elseif ($user->user_type === 'admin') {
+            return redirect()->intended('/admin/dashboard');
+        } else {
+            return redirect()->intended('/dashboard');
+        }
     }
 
     /**

@@ -53,8 +53,8 @@
                 </div>
             </div>
         </div>
-    </div>
-
+                        </div>
+                        
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col lg:flex-row gap-8">
         <!-- Sticky Filters Sidebar (desktop only) -->
         <aside class="hidden lg:block lg:w-1/4 flex-shrink-0 sticky top-24 self-start z-20">
@@ -222,8 +222,8 @@
                             </select>
                         </div>
                         <button type="submit" class="w-full bg-orange-500 text-white py-2 px-4 rounded-md hover:bg-orange-600 transition">
-                            Apply Filters
-                        </button>
+                                Apply Filters
+                            </button>
                     </form>
                 </div>
             </div>
@@ -273,16 +273,16 @@
                             @else
                                 <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
                                     <span class="text-gray-400">No Photo</span>
-                                </div>
-                            @endif
+                            </div>
+                        @endif
                             <!-- Content -->
-                            <div class="p-4">
+                        <div class="p-4">
                                 <!-- Tags -->
                                 <div class="flex flex-wrap gap-1 mb-2">
                                     @foreach($item->tags as $tag)
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style="background: {{ $tag->color }}20; color: {{ $tag->color }};">
                                             {{ $tag->icon }} {{ $tag->name }}
-                                        </span>
+                                </span>
                                     @endforeach
                                 </div>
                                 <!-- Title & Description -->
@@ -304,7 +304,7 @@
                                         <div class="text-sm text-gray-500">Available: {{ $item->available_date }}</div>
                                         <div class="text-sm text-green-600">{{ $item->available_quantity }} left</div>
                                     </div>
-                                </div>
+                            </div>
                             </div>
                         </div>
                     </a>

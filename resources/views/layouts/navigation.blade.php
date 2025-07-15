@@ -16,10 +16,10 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
                     @if(Auth::user() && Auth::user()->user_type === 'provider')
-                        <x-nav-link :href="route('food-items.index')" :active="request()->routeIs('food-items.*')">
+                        <x-nav-link :href="route('provider.food-items.index')" :active="request()->routeIs('provider.food-items.*')">
                             {{ __('My Store') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
+                        <x-nav-link :href="route('provider.orders.index')" :active="request()->routeIs('provider.orders.*')">
                             {{ __('My Orders') }}
                         </x-nav-link>
                     @elseif(Auth::user() && Auth::user()->user_type === 'customer')
@@ -86,7 +86,7 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
             @if(Auth::user() && Auth::user()->user_type === 'provider')
-                <x-responsive-nav-link :href="route('food-items.index')" :active="request()->routeIs('food-items.*')">
+                <x-responsive-nav-link :href="route('provider.food-items.index')" :active="request()->routeIs('provider.food-items.*')">
                     {{ __('My Store') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">

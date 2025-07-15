@@ -35,7 +35,7 @@
                                 <div>
                                     <div class="font-semibold text-lg text-gray-900">{{ $order->foodItem->title }}</div>
                                     <div class="text-sm text-gray-500">From {{ $order->provider->name }}</div>
-                                    <div class="text-xs text-gray-400">Pickup: {{ $order->pickup_time->format('M d, Y g:i A') }}</div>
+                                    <div class="text-xs text-gray-400">Pickup: {{ $order->pickup_time ? $order->pickup_time->format('M d, Y g:i A') : 'Not set' }}</div>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2 mt-2">
@@ -51,7 +51,7 @@
                                     @endif">
                                     {{ ucfirst($order->status) }}
                                 </span>
-                                <span class="text-green-600 font-bold ml-auto">₹{{ $order->total_amount }}</span>
+                                <span class="text-green-600 font-bold ml-auto">£{{ $order->total_amount }}</span>
                             </div>
                             <!-- Progress Bar -->
                             <div class="w-full h-2 bg-gray-100 rounded mt-2">
@@ -104,7 +104,7 @@
                                     @endif">
                                     {{ ucfirst($order->status) }}
                                 </span>
-                                <span class="text-green-600 font-bold ml-auto">₹{{ $order->total_amount }}</span>
+                                <span class="text-green-600 font-bold ml-auto">£{{ $order->total_amount }}</span>
                             </div>
                             <div class="flex gap-2 mt-3">
                                 <a href="{{ route('food-items.show', $order->foodItem) }}" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 text-center py-2 rounded-lg font-semibold">Order Again</a>
@@ -134,7 +134,7 @@
                                 <div>
                                     <div class="font-semibold text-lg text-gray-900">{{ $item->title }}</div>
                                     <div class="text-sm text-gray-500">by {{ $item->provider->name }}</div>
-                                    <div class="text-xs text-gray-400">₹{{ $item->price }}</div>
+                                    <div class="text-xs text-gray-400">£{{ $item->price }}</div>
                                 </div>
                             </div>
                             <div class="flex gap-2 mt-3">

@@ -68,7 +68,7 @@ class FoodItemController extends Controller
 
         FoodItem::create($validated);
 
-        return redirect()->route('food-items.index')->with('success', 'Food item created successfully!');
+        return redirect()->route('provider.food-items.index')->with('success', 'Food item created successfully!');
     }
 
     /**
@@ -128,7 +128,7 @@ class FoodItemController extends Controller
 
         $foodItem->update($validated);
 
-        return redirect()->route('food-items.index')->with('success', 'Food item updated successfully!');
+        return redirect()->route('provider.food-items.index')->with('success', 'Food item updated successfully!');
     }
 
     /**
@@ -147,13 +147,13 @@ class FoodItemController extends Controller
 
         $foodItem->delete();
 
-        return redirect()->route('food-items.index')->with('success', 'Food item deleted successfully!');
+        return redirect()->route('provider.food-items.index')->with('success', 'Food item deleted successfully!');
     }
 
     public function clone(FoodItem $foodItem)
     {
         $this->authorize('update', $foodItem);
-        return redirect()->route('food-items.create', ['clone_id' => $foodItem->id]);
+        return redirect()->route('provider.food-items.create', ['clone_id' => $foodItem->id]);
     }
 
     public function reactivate(FoodItem $foodItem)
