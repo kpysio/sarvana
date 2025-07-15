@@ -1,302 +1,179 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ $foodItem->title ?? '[No Title]' }}
-            </h2>
-            <div class="flex space-x-2">
-                @if(auth()->check() && isset($foodItem->provider_id) && auth()->id() === $foodItem->provider_id)
-                    <a href="{{ route('food-items.edit', $foodItem) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-                        Edit
-                    </a>
-                @endif
-                <a href="{{ url('/search') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg">
-                    Back to List
-                </a>
-            </div>
-        </div>
-    </x-slot>
+@extends('layouts.provider')
 
-    @if(!$foodItem || empty($foodItem->title))
-        <div class="max-w-2xl mx-auto mt-10 bg-red-100 text-red-700 p-4 rounded-lg">
-            <strong>Debug:</strong> Food item data is missing or incomplete.<br>
-            <pre>{{ var_export($foodItem, true) }}</pre>
+@section('content')
+<div class="mb-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Food Item Details</h2>
+            <p class="text-gray-600">{{ $foodItem->title }}</p>
         </div>
-    @endif
-
-    <!-- Advanced UI/UX Food Item Detail -->
-    <div class="py-8 bg-gradient-to-br from-orange-100 via-yellow-50 to-pink-100 min-h-screen">
-        <div class="max-w-3xl mx-auto rounded-2xl shadow-xl overflow-hidden bg-white">
-            <!-- Photo Gallery -->
-            <div class="relative">
-                @php
-                    $photos = $foodItem->photos;
-                    if (is_string($photos)) {
-                        $photos = json_decode($photos, true);
-                    }
-                    if (!is_array($photos)) {
-                        $photos = [];
-                    }
-                @endphp
-                <div class="flex overflow-x-auto snap-x snap-mandatory">
-                    @if(count($photos) > 0)
-                        @foreach($photos as $i => $photo)
-                            @php
-                                $isUrl = Str::startsWith($photo, ['http://', 'https://']);
-                                $src = $isUrl ? $photo : asset('storage/' . ltrim($photo, '/'));
-                            @endphp
-                            <img src="{{ $src }}" alt="{{ $foodItem->title ?? 'Photo' }}" class="w-full h-72 object-cover snap-center transition-transform duration-300">
-                        @endforeach
-                    @else
-                        <div class="w-full h-72 bg-gray-200 flex items-center justify-center">
-                            <span class="text-gray-400">No Photos Available</span>
-                        </div>
-                    @endif
-                </div>
-                <!-- Gallery indicators -->
-                @if(count($photos) > 1)
-                    <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                        @foreach($photos as $i => $photo)
-                            <span class="w-3 h-3 rounded-full bg-white border border-gray-400 {{ $i === 0 ? 'ring-2 ring-orange-400' : '' }}"></span>
-                        @endforeach
-                    </div>
-                @endif
-                <!-- Favorite Button -->
-                <button class="absolute top-4 right-4 bg-white rounded-full shadow p-2 hover:scale-110 transition-all">
-                    <svg class="w-7 h-7 text-pink-500 animate-pulse" fill="currentColor" viewBox="0 0 20 20"><path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/></svg>
-                </button>
-                <!-- Offer Badge -->
-                <div class="absolute top-4 left-4 bg-gradient-to-r from-pink-500 to-orange-400 text-white px-4 py-1 rounded-full font-bold shadow-lg animate-bounce">
-                    Buy 1 Get 1 FREE
+        <div class="flex space-x-2">
+            <a href="{{ route('provider.food-items.edit', $foodItem) }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Edit Item</a>
+            <a href="{{ route('provider.food-items.index') }}" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">Back to My Store</a>
+        </div>
+    </div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Food Item Information -->
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Food Item Information</h3>
+        <div class="space-y-3">
+            <div>
+                <label class="text-sm font-medium text-gray-500">Title</label>
+                <p class="text-gray-900">{{ $foodItem->title }}</p>
+            </div>
+            <div>
+                <label class="text-sm font-medium text-gray-500">Description</label>
+                <p class="text-gray-900">{{ $foodItem->description }}</p>
+            </div>
+            <div>
+                <label class="text-sm font-medium text-gray-500">Category</label>
+                <p class="text-gray-900">{{ ucfirst($foodItem->category) }}</p>
+            </div>
+            <div>
+                <label class="text-sm font-medium text-gray-500">Price</label>
+                <p class="text-gray-900">£{{ $foodItem->price }}</p>
+            </div>
+            <div>
+                <label class="text-sm font-medium text-gray-500">Available Quantity</label>
+                <p class="text-gray-900">{{ $foodItem->available_quantity }}</p>
+            </div>
+            <div>
+                <label class="text-sm font-medium text-gray-500">Pickup Address</label>
+                <p class="text-gray-900">{{ $foodItem->pickup_address }}</p>
+            </div>
+            <div>
+                <label class="text-sm font-medium text-gray-500">Order Type</label>
+                <p class="text-gray-900">{{ ucfirst($foodItem->order_type) }}</p>
+            </div>
+            <div>
+                <label class="text-sm font-medium text-gray-500">Available Date</label>
+                <p class="text-gray-900">{{ $foodItem->available_date ? $foodItem->available_date->format('M d, Y') : 'N/A' }} {{ $foodItem->available_time ? $foodItem->available_time : '' }}</p>
+            </div>
+            @if($foodItem->expiry_date)
+            <div>
+                <label class="text-sm font-medium text-gray-500">Expiry Date</label>
+                <p class="text-gray-900">{{ $foodItem->expiry_date->format('M d, Y') }}</p>
+            </div>
+            @endif
+            @if($foodItem->photos && is_array($foodItem->photos) && count($foodItem->photos) > 0)
+            <div>
+                <label class="text-sm font-medium text-gray-500">Photo</label>
+                <img src="{{ is_string($foodItem->photos[0]) ? (Str::startsWith($foodItem->photos[0], ['http://', 'https://']) ? $foodItem->photos[0] : asset('storage/' . ltrim($foodItem->photos[0], '/'))) : '' }}" alt="{{ $foodItem->title }}" class="w-40 h-40 object-cover rounded-lg border mt-2">
+            </div>
+            @endif
+        </div>
+    </div>
+    <!-- Item Status Card -->
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Item Status</h3>
+        <div class="space-y-3">
+            <div>
+                <label class="text-sm font-medium text-gray-500">Status</label>
+                <div class="flex gap-2 mt-2">
+                    @foreach(['active','inactive','expired'] as $status)
+                        <form method="POST" action="{{ route('provider.food-items.update', $foodItem) }}" class="inline">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="status" value="{{ $status }}">
+                            <button type="submit" class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs focus:outline-none transition {{
+                                $foodItem->status === $status ? (
+                                    $status === 'active' ? 'bg-green-500 text-white' :
+                                    ($status === 'inactive' ? 'bg-gray-500 text-white' : 'bg-red-500 text-white')
+                                ) : (
+                                    $status === 'active' ? 'bg-green-100 text-green-700 hover:bg-green-200' :
+                                    ($status === 'inactive' ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-red-100 text-red-700 hover:bg-red-200')
+                                )
+                            }}" title="Set status to {{ ucfirst($status) }}">
+                                {{ strtoupper(substr($status,0,1)) }}
+                            </button>
+                        </form>
+                    @endforeach
                 </div>
             </div>
-            <!-- Details Section -->
-            <div class="p-6 md:p-8">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-                    <div>
-                        <h1 class="text-3xl font-extrabold text-gray-900 mb-2">{{ $foodItem->title ?? '[No Title]' }}</h1>
-                        <div class="flex items-center space-x-2">
-                            <span class="text-lg text-green-600 font-bold">£{{ $foodItem->price ?? 'N/A' }}</span>
-                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">{{ $foodItem->available_quantity ?? 0 }} available</span>
-                        </div>
-                    </div>
-                    <!-- Order Deadline Timer -->
-                    <div class="flex flex-col items-end">
-                        <span class="text-xs text-gray-500">Order Deadline</span>
-                        <span id="deadline-timer" class="text-lg font-bold text-orange-600">2h 30m left</span>
-                    </div>
-                </div>
-                <div class="mb-4 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 rounded">
-                    <strong>Note:</strong> This food will be ready for pickup on
-                    @if(isset($foodItem->available_date) && $foodItem->available_date)
-                        <strong>{{ $foodItem->available_date->format('M d, Y') }}</strong>
-                    @else
-                        <strong>N/A</strong>
-                    @endif
-                    at
-                    @if(isset($foodItem->available_time) && $foodItem->available_time)
-                        <strong>{{ \Carbon\Carbon::parse($foodItem->available_time)->format('g:i A') }}</strong>
-                    @else
-                        <strong>N/A</strong>
-                    @endif
-                    . Please collect your order only after this time.
-                </div>
-                <p class="text-gray-700 mb-4">{{ $foodItem->description ?? '' }}</p>
-                <div class="flex flex-wrap gap-2 mb-4">
-                    @if(isset($foodItem->tags) && count($foodItem->tags) > 0)
-                        @foreach($foodItem->tags as $tag)
-                            <span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-semibold">{{ $tag->name ?? $tag }}</span>
-                        @endforeach
-                    @endif
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <span class="block text-xs text-gray-500">Pickup Address</span>
-                        <span class="block text-gray-900 font-medium">{{ $foodItem->pickup_address ?? 'N/A' }}</span>
-                    </div>
-                    <div>
-                        <span class="block text-xs text-gray-500">Available</span>
-                        <span class="block text-gray-900 font-medium">
-                            @if(isset($foodItem->available_date) && $foodItem->available_date)
-                                {{ $foodItem->available_date->format('M d, Y') }}
-                            @else
-                                N/A
-                            @endif
-                            at
-                            @if(isset($foodItem->available_time) && $foodItem->available_time)
-                                {{ \Carbon\Carbon::parse($foodItem->available_time)->format('g:i A') }}
-                            @else
-                                N/A
-                            @endif
-                        </span>
-                    </div>
-                </div>
-                <!-- Provider Info -->
-                <div class="flex items-center space-x-4 mb-6">
-                    <img src="https://api.dicebear.com/7.x/initials/svg?seed={{ urlencode($foodItem->provider->name ?? 'Provider') }}" class="w-12 h-12 rounded-full border-2 border-orange-400" alt="Provider">
-                    <div>
-                        <div class="font-bold text-gray-800">{{ $foodItem->provider->name ?? 'Provider' }}</div>
-                        <div class="text-xs text-gray-500">{{ $foodItem->provider->bio ?? 'Home Cook' }}</div>
-                        <div class="flex items-center text-yellow-500">
-                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.385-2.46a1 1 0 00-1.175 0l-3.385 2.46c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.045 9.394c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z"/></svg>
-                            <span class="font-semibold">{{ number_format($foodItem->provider->rating ?? 4.7, 1) }}</span>
-                        </div>
-                    </div>
-                </div>
-                <!-- Real-time Availability -->
-                <div class="mb-6">
-                    <span class="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold animate-pulse">{{ $foodItem->available_quantity ?? 0 }} items available</span>
-                </div>
-                <!-- Order Form for Customers -->
-                @if(auth()->user() && method_exists(auth()->user(), 'isCustomer') && auth()->user()->isCustomer())
-                    <form id="orderForm" action="{{ route('orders.store') }}" method="POST" class="space-y-4">
-                        @csrf
-                        <input type="hidden" name="food_item_id" value="{{ $foodItem->id }}">
-                        <input type="hidden" name="provider_id" value="{{ $foodItem->provider_id }}">
-                        <div class="flex items-center space-x-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
-                            <button type="button" class="decrement bg-gray-200 px-2 py-1 rounded-full text-lg">-</button>
-                            <input type="number" id="quantityInput" name="quantity" min="1" max="{{ $foodItem->available_quantity ?? 1 }}" value="1" class="w-16 border border-gray-300 rounded-md px-3 py-2 text-center" required readonly>
-                            <button type="button" class="increment bg-gray-200 px-2 py-1 rounded-full text-lg">+</button>
-                            <span class="text-xs text-gray-500">Available: {{ $foodItem->available_quantity ?? 0 }}</span>
-                        </div>
-                        <div class="text-sm text-gray-700 mb-2">
-                            <span>Total Price: £<span id="totalPrice">{{ $foodItem->price }}</span></span>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Pickup Time</label>
-                            <div class="text-gray-500 italic">Provider will set pickup time after order is placed.</div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Special Instructions</label>
-                            <textarea name="customer_notes" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
-                        </div>
-                        <button id="placeOrderBtn" type="submit" class="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-semibold py-2 px-4 rounded-md shadow-lg transition-all flex items-center justify-center">
-                            <span id="orderBtnText">Place Order</span>
-                            <svg id="orderLoading" class="hidden animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
-                        </button>
-                        <div id="orderSuccess" class="hidden mt-2 text-green-600 font-semibold text-center">Order placed successfully!</div>
-                        <div id="orderError" class="hidden mt-2 text-red-600 font-semibold text-center"></div>
-                    </form>
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            const qtyInput = document.getElementById('quantityInput');
-                            const pricePerItem = {{ $foodItem->price ?? 0 }};
-                            const maxQty = {{ $foodItem->available_quantity ?? 1 }};
-                            const totalPrice = document.getElementById('totalPrice');
-                            document.querySelector('.increment').onclick = () => {
-                                let v = parseInt(qtyInput.value); if (v < maxQty) qtyInput.value = v+1; totalPrice.textContent = (qtyInput.value * pricePerItem).toFixed(2);
-                            };
-                            document.querySelector('.decrement').onclick = () => {
-                                let v = parseInt(qtyInput.value); if (v > 1) qtyInput.value = v-1; totalPrice.textContent = (qtyInput.value * pricePerItem).toFixed(2);
-                            };
-                            // Prevent manual input
-                            qtyInput.addEventListener('keydown', e => e.preventDefault());
-                            // Order form submission with loading and success/error
-                            const orderForm = document.getElementById('orderForm');
-                            const placeOrderBtn = document.getElementById('placeOrderBtn');
-                            const orderBtnText = document.getElementById('orderBtnText');
-                            const orderLoading = document.getElementById('orderLoading');
-                            const orderSuccess = document.getElementById('orderSuccess');
-                            const orderError = document.getElementById('orderError');
-                            orderForm.onsubmit = function(e) {
-                                e.preventDefault();
-                                orderSuccess.classList.add('hidden');
-                                orderError.classList.add('hidden');
-                                placeOrderBtn.disabled = true;
-                                orderBtnText.textContent = 'Placing...';
-                                orderLoading.classList.remove('hidden');
-                                fetch(orderForm.action, {
-                                    method: 'POST',
-                                    headers: {
-                                        'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value,
-                                        'Accept': 'application/json',
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({
-                                        food_item_id: {{ $foodItem->id }},
-                                        provider_id: {{ $foodItem->provider_id }},
-                                        quantity: qtyInput.value,
-                                        customer_notes: orderForm.customer_notes.value,
-                                    })
-                                })
-                                .then(res => res.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        orderSuccess.classList.remove('hidden');
-                                        orderForm.reset();
-                                        qtyInput.value = 1;
-                                        totalPrice.textContent = pricePerItem.toFixed(2);
-                                    } else {
-                                        orderError.textContent = data.message || 'Order failed.';
-                                        orderError.classList.remove('hidden');
-                                    }
-                                })
-                                .catch(() => {
-                                    orderError.textContent = 'Order failed. Please try again.';
-                                    orderError.classList.remove('hidden');
-                                })
-                                .finally(() => {
-                                    placeOrderBtn.disabled = false;
-                                    orderBtnText.textContent = 'Place Order';
-                                    orderLoading.classList.add('hidden');
-                                });
-                            };
-                        });
-                    </script>
-                @endif
-                <!-- Reviews Section -->
-                <div class="mt-8">
-                    <h3 class="text-lg font-bold mb-2">Customer Reviews</h3>
-                    <div class="space-y-4">
-                        @if(isset($foodItem->reviews) && count($foodItem->reviews) > 0)
-                            @foreach($foodItem->reviews as $review)
-                                <div class="bg-gray-50 p-4 rounded-lg shadow flex items-start space-x-3">
-                                    <img src="https://api.dicebear.com/7.x/initials/svg?seed={{ urlencode($review->reviewer->name ?? 'C') }}" class="w-8 h-8 rounded-full" alt="Reviewer">
-                                    <div>
-                                        <div class="flex items-center space-x-2">
-                                            <span class="font-semibold text-gray-800">{{ $review->reviewer->name ?? 'Customer' }}</span>
-                                            <span class="text-yellow-500 flex items-center">
-                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.385-2.46a1 1 0 00-1.175 0l-3.385 2.46c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.045 9.394c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z"/></svg>
-                                                <span class="ml-1 font-bold">{{ $review->rating ?? 5 }}</span>
-                                            </span>
-                                        </div>
-                                        <div class="text-gray-600 text-sm mt-1">{{ $review->comment ?? '' }}</div>
-                                        @if(isset($review->photo) && $review->photo)
-                                            @php
-                                                $isUrl = Str::startsWith($review->photo, ['http://', 'https://']);
-                                                $src = $isUrl ? $review->photo : asset('storage/' . ltrim($review->photo, '/'));
-                                            @endphp
-                                            <img src="{{ $src }}" class="w-20 h-20 object-cover rounded mt-2">
-                                        @endif
-                                    </div>
-                                </div>
-                            @endforeach
-                        @else
-                            <div class="text-gray-400">No reviews yet.</div>
-                        @endif
-                    </div>
-                </div>
+            <div>
+                <label class="text-sm font-medium text-gray-500">Expiry</label>
+                <p class="text-gray-900">@if($foodItem->expiry_date){{ $foodItem->expiry_date->format('M d, Y') }}@else N/A @endif</p>
             </div>
         </div>
     </div>
-    <script>
-        // Countdown timer for order deadline (example: 2h 30m left)
-        document.addEventListener('DOMContentLoaded', function() {
-            const timer = document.getElementById('deadline-timer');
-            // Example: deadline is 2.5 hours from now
-            let deadline = new Date();
-            deadline.setHours(deadline.getHours() + 2, deadline.getMinutes() + 30, 0, 0);
-            function updateTimer() {
-                let now = new Date();
-                let diff = deadline - now;
-                if (diff <= 0) { timer.textContent = 'Order closed'; return; }
-                let h = Math.floor(diff / 1000 / 60 / 60);
-                let m = Math.floor((diff / 1000 / 60) % 60);
-                timer.textContent = `${h}h ${m}m left`;
-            }
-            setInterval(updateTimer, 1000);
-            updateTimer();
-        });
-    </script>
-</x-app-layout> 
+    <!-- Quick Actions Card -->
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
+        <div class="space-y-3">
+            <a href="{{ route('provider.food-items.edit', $foodItem) }}" class="w-full block bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-md font-semibold text-center">Edit</a>
+            <a href="{{ route('provider.food-items.create', ['clone_id' => $foodItem->id]) }}" class="w-full block bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md font-semibold text-center">Clone</a>
+            <form action="{{ route('provider.food-items.extendExpiry', $foodItem) }}" method="POST" class="w-full flex items-center">
+                @csrf
+                <input type="number" name="days" min="1" max="365" value="7" class="w-14 text-xs border rounded px-1 mr-1" style="height: 2em;" />
+                <button type="submit" class="flex-1 bg-yellow-100 text-yellow-700 hover:bg-yellow-200 text-xs font-semibold py-2 px-3 rounded-lg">Extend</button>
+            </form>
+            @if($foodItem->status === 'active')
+            <form action="{{ route('provider.food-items.markSoldOut', $foodItem) }}" method="POST" class="w-full">
+                @csrf
+                <button type="submit" class="w-full bg-red-100 text-red-700 hover:bg-red-200 text-xs font-semibold py-2 px-3 rounded-lg">Mark Sold Out</button>
+            </form>
+            @endif
+            @if($foodItem->status === 'expired' || $foodItem->status === 'inactive')
+            <form action="{{ route('provider.food-items.reactivate', $foodItem) }}" method="POST" class="w-full">
+                @csrf
+                <button type="submit" class="w-full bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs font-semibold py-2 px-3 rounded-lg">Reactivate</button>
+            </form>
+            @endif
+            <form action="{{ route('provider.food-items.destroy', $foodItem) }}" method="POST" class="w-full">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="w-full bg-red-500 text-white hover:bg-red-600 text-xs font-semibold py-2 px-3 rounded-lg" onclick="return confirm('Are you sure you want to delete this item?')">Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Add Notes Card -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Add Notes</h3>
+        <form method="POST" action="#">
+            <textarea class="w-full border rounded-lg p-2 mb-2" rows="3" placeholder="Add notes about this item..."></textarea>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Save Note</button>
+        </form>
+    </div>
+    <!-- Trace/History Card (placeholder) -->
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Trace / History</h3>
+        <ul class="text-sm text-gray-700 dark:text-gray-200 space-y-2">
+            <li>Created: {{ $foodItem->created_at->format('M d, Y H:i') }}</li>
+            <li>Last Updated: {{ $foodItem->updated_at->format('M d, Y H:i') }}</li>
+            <!-- Add more trace/history events as needed -->
+        </ul>
+    </div>
+</div>
+<!-- Recent Orders for this Item -->
+<div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow mb-8">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Orders for this Item</h3>
+    @if(isset($foodItem->orders) && $foodItem->orders->count() > 0)
+    <div class="space-y-3">
+        @foreach($foodItem->orders->take(5) as $order)
+        <div class="border-b border-gray-200 pb-3">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="font-medium text-gray-900">Order #{{ $order->id }}</p>
+                    <p class="text-sm text-gray-500">£{{ number_format($order->total_amount, 2) }} • {{ $order->quantity }} items</p>
+                </div>
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                    @if($order->status === 'completed') bg-green-100 text-green-800
+                    @elseif($order->status === 'pending') bg-yellow-100 text-yellow-800
+                    @elseif($order->status === 'cancelled') bg-red-100 text-red-800
+                    @else bg-blue-100 text-blue-800
+                    @endif">
+                    {{ ucfirst($order->status) }}
+                </span>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">{{ $order->created_at->format('M d, Y H:i') }}</p>
+        </div>
+        @endforeach
+    </div>
+    @else
+    <p class="text-gray-500">No orders found for this item.</p>
+    @endif
+</div>
+@endsection 

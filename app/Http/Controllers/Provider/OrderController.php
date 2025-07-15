@@ -27,7 +27,29 @@ class OrderController extends Controller
     {
         $this->authorize('view', $order);
         $order->load(['foodItem', 'customer']);
-        return view('provider.orders.show', compact('order'));
+        // For AJAX modal: return a view with a <script> tag containing JSON
+        if (request()->expectsJson() || request()->ajax()) {
+            return response()->json($order);
+        }
+        return view('provider.orders.show', [
+            'order' => $order,
+            'orderJson' => json_encode([
+                'id' => $order->id,
+                'status' => $order->status,
+                'created_at' => $order->created_at->toDateTimeString(),
+                'customer' => $order->customer ? [
+                    'id' => $order->customer->id,
+                    'name' => $order->customer->name,
+                ] : null,
+                'food_item' => $order->foodItem ? [
+                    'id' => $order->foodItem->id,
+                    'title' => $order->foodItem->title,
+                ] : null,
+                'quantity' => $order->quantity,
+                'pickup_time' => $order->pickup_time ? $order->pickup_time->toDateTimeString() : null,
+                'customer_notes' => $order->customer_notes,
+            ]),
+        ]);
     }
 
     public function updateStatus(Request $request, Order $order)
@@ -42,6 +64,9 @@ class OrderController extends Controller
             'timestamp' => now(),
         ]);
         $order->save();
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'status' => $order->status]);
+        }
         return back()->with('success', 'Order status updated!');
     }
 

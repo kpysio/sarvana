@@ -16,4 +16,9 @@ class FoodItemPolicy
     {
         return $user->id === $foodItem->provider_id;
     }
+
+    public function view(User $user, FoodItem $foodItem)
+    {
+        return $user->id === $foodItem->provider_id;
+    }
 } 

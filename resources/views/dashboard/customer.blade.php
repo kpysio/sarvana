@@ -67,7 +67,7 @@
                                 @if($order->status === 'ready' && $order->proof_photo)
                                     <a href="{{ asset('storage/' . $order->proof_photo) }}" target="_blank" class="flex-1 bg-green-500 hover:bg-green-600 text-white text-center py-2 rounded-lg font-semibold">View Proof</a>
                                 @endif
-                                <a href="{{ route('food-items.show', $order->foodItem) }}" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 text-center py-2 rounded-lg font-semibold">Order Again</a>
+                                <a href="{{ route('customers.food-item.show', $order->foodItem) }}" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 text-center py-2 rounded-lg font-semibold">Order Again</a>
                             </div>
                         </div>
                     @endforeach
@@ -107,7 +107,7 @@
                                 <span class="text-green-600 font-bold ml-auto">£{{ $order->total_amount }}</span>
                             </div>
                             <div class="flex gap-2 mt-3">
-                                <a href="{{ route('food-items.show', $order->foodItem) }}" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 text-center py-2 rounded-lg font-semibold">Order Again</a>
+                                <a href="{{ route('customers.food-item.show', $order->foodItem) }}" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 text-center py-2 rounded-lg font-semibold">Order Again</a>
                                 <a href="#" class="flex-1 bg-yellow-400 hover:bg-yellow-500 text-white text-center py-2 rounded-lg font-semibold">Rate</a>
                             </div>
                         </div>
@@ -138,8 +138,8 @@
                                 </div>
                             </div>
                             <div class="flex gap-2 mt-3">
-                                <a href="{{ route('food-items.show', $item) }}" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-center py-2 rounded-lg font-semibold">Order Again</a>
-                                <a href="{{ route('food-items.show', $item) }}" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 text-center py-2 rounded-lg font-semibold">View</a>
+                                <a href="{{ route('customers.food-item.show', $item) }}" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-center py-2 rounded-lg font-semibold">Order Again</a>
+                                <a href="{{ route('customers.food-item.show', $item) }}" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 text-center py-2 rounded-lg font-semibold">View</a>
                             </div>
                         </div>
                     @endforeach

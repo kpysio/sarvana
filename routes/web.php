@@ -99,22 +99,23 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 });
 
 // ------------------- PROVIDER ROUTES -------------------
-Route::middleware(['auth', 'provider', 'active.membership'])->prefix('provider')->name('provider.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::resource('food-items', FoodItemController::class);
-    Route::post('food-items/{foodItem}/reactivate', [FoodItemController::class, 'reactivate'])->name('food-items.reactivate');
-    Route::post('food-items/{foodItem}/extend-expiry', [FoodItemController::class, 'extendExpiry'])->name('food-items.extendExpiry');
-    Route::post('food-items/{foodItem}/mark-sold-out', [FoodItemController::class, 'markSoldOut'])->name('food-items.markSoldOut');
-    Route::get('/onboarding', function () {
-        return view('provider.onboarding');
-    })->name('onboarding');
-    Route::prefix('orders')->name('orders.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Provider\OrderController::class, 'index'])->name('index');
-        Route::get('/{order}', [\App\Http\Controllers\Provider\OrderController::class, 'show'])->name('show');
-        Route::post('/{order}/status', [\App\Http\Controllers\Provider\OrderController::class, 'updateStatus'])->name('updateStatus');
-        Route::post('/{order}/pickup-time', [\App\Http\Controllers\Provider\OrderController::class, 'setPickupTime'])->name('setPickupTime');
-        Route::post('/{order}/note', [\App\Http\Controllers\Provider\OrderController::class, 'addNote'])->name('addNote');
-    });
+Route::middleware(['auth', 'provider'])->prefix('provider')->name('provider.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Provider\DashboardController::class, 'index'])->name('dashboard');
+    // Food Items Management
+    Route::get('/food-items', [\App\Http\Controllers\Provider\FoodItemController::class, 'index'])->name('food-items.index');
+    Route::get('/food-items/create', [\App\Http\Controllers\Provider\FoodItemController::class, 'create'])->name('food-items.create');
+    Route::post('/food-items', [\App\Http\Controllers\Provider\FoodItemController::class, 'store'])->name('food-items.store');
+    Route::get('/food-items/{foodItem}', [\App\Http\Controllers\Provider\FoodItemController::class, 'show'])->name('food-items.show');
+    Route::get('/food-items/{foodItem}/edit', [\App\Http\Controllers\Provider\FoodItemController::class, 'edit'])->name('food-items.edit');
+    Route::put('/food-items/{foodItem}', [\App\Http\Controllers\Provider\FoodItemController::class, 'update'])->name('food-items.update');
+    Route::delete('/food-items/{foodItem}', [\App\Http\Controllers\Provider\FoodItemController::class, 'destroy'])->name('food-items.destroy');
+    Route::post('/food-items/{foodItem}/extend-expiry', [\App\Http\Controllers\Provider\FoodItemController::class, 'extendExpiry'])->name('food-items.extendExpiry');
+    Route::post('/food-items/{foodItem}/reactivate', [\App\Http\Controllers\Provider\FoodItemController::class, 'reactivate'])->name('food-items.reactivate');
+    Route::post('/food-items/{foodItem}/mark-sold-out', [\App\Http\Controllers\Provider\FoodItemController::class, 'markSoldOut'])->name('food-items.markSoldOut');
+    // Order Management
+    Route::get('/orders', [\App\Http\Controllers\Provider\OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [\App\Http\Controllers\Provider\OrderController::class, 'show'])->name('orders.show');
+    Route::put('/orders/{order}/status', [\App\Http\Controllers\Provider\OrderController::class, 'updateStatus'])->name('orders.status');
 });
 
 // ------------------- CUSTOMER ROUTES -------------------
@@ -149,6 +150,8 @@ Route::get('/search/providers', [SearchController::class, 'providers'])->name('s
 Route::get('/search/providers/{provider}', [SearchController::class, 'provider'])->name('search.provider');
 // Food item detail (protected)
 Route::get('/food-items/{foodItem}', [FoodItemController::class, 'show'])->middleware('auth')->name('food-items.show');
+// Public/customer food item page
+Route::get('/food-items/{foodItem}', [App\Http\Controllers\FoodItemController::class, 'publicShow'])->name('customers.food-item.show');
 // Orders (common for both roles)
 Route::middleware('auth')->group(function () {
     Route::resource('orders', OrderController::class);
@@ -164,6 +167,10 @@ Route::middleware('auth')->group(function () {
 // Provider registration
 Route::get('/register/provider', [ProviderRegisterController::class, 'show'])->name('register.provider');
 Route::post('/register/provider', [ProviderRegisterController::class, 'register']);
+
+Route::get('/', function () {
+    return view('welcome');
+});
 
 Route::get('/logout-dev', function () {
     Auth::logout();

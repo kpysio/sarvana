@@ -56,6 +56,7 @@
         </form>
     </div>
 </div>
+<script type="application/json" id="order-json">{!! $orderJson !!}</script>
 <style>
 .timeline { list-style: none; padding-left: 0; }
 .timeline li { position: relative; padding-left: 1.5em; margin-bottom: 1em; }

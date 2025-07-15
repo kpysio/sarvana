@@ -43,7 +43,7 @@
                 <ul>
                     @forelse($popular as $item)
                         <li>
-                            <a href="{{ route('food-items.show', $item['id']) }}" class="underline">{{ $item['title'] ?? 'Unknown' }}</a>
+                            <a href="{{ route('customers.food-item.show', $item['id']) }}" class="underline">{{ $item['title'] ?? 'Unknown' }}</a>
                             <span class="text-xs text-gray-500">({{ $item['count'] }} sold)</span>
                         </li>
                     @empty

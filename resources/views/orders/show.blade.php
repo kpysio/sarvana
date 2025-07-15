@@ -15,7 +15,16 @@
     <div class="bg-white rounded shadow p-6 mb-6">
         <h2 class="text-lg font-semibold mb-4">Order Timeline</h2>
         <ul class="timeline" id="orderTimeline">
-            @php $history = is_array($order->history) ? $order->history : json_decode($order->history, true) ?? []; @endphp
+            @php 
+                $history = is_array($order->history) ? $order->history : json_decode($order->history, true) ?? [];
+                // Ensure $history is an array of arrays
+                if (!is_array($history) || !array_is_list($history)) {
+                    $history = [];
+                } else {
+                    // Remove any non-array elements
+                    $history = array_filter($history, 'is_array');
+                }
+            @endphp
             <li><span class="font-bold">Order Placed</span> by You - {{ $order->created_at->format('M d, Y g:i A') }}</li>
             @foreach($history as $event)
                 <li>

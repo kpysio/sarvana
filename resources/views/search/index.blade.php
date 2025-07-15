@@ -242,7 +242,7 @@
             <!-- Food Items Grid/List -->
             <div id="foodGrid" class="grid gap-6 {{ !request('view') || request('view')=='grid' ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1' }}">
                 @forelse($foodItems as $item)
-                    <a href="{{ route('food-items.show', $item) }}" class="block">
+                    <a href="{{ route('customers.food-item.show', $item) }}" class="block">
                         <div class="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow duration-200 cursor-pointer relative group">
                             <!-- Badges -->
                             <div class="absolute top-3 left-3 flex flex-col gap-1 z-10">

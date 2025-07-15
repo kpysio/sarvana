@@ -1,104 +1,165 @@
-@extends('layouts.app')
+@extends('layouts.provider')
 
 @section('content')
-<div class="max-w-5xl mx-auto py-8">
-    <h1 class="text-2xl font-bold mb-6">My Orders</h1>
-    <!-- Filter Bar -->
-    <form method="GET" class="mb-4 flex flex-col md:flex-row gap-2 md:gap-4 items-stretch md:items-end">
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <select name="status" class="w-full border rounded px-2 py-1">
-                <option value="">All</option>
-                <option value="pending" @if(request('status')=='pending') selected @endif>Pending</option>
-                <option value="accepted" @if(request('status')=='accepted') selected @endif>Accepted</option>
-                <option value="rejected" @if(request('status')=='rejected') selected @endif>Rejected</option>
-                <option value="preparing" @if(request('status')=='preparing') selected @endif>Preparing</option>
-                <option value="ready" @if(request('status')=='ready') selected @endif>Ready</option>
-                <option value="collected" @if(request('status')=='collected') selected @endif>Collected</option>
-                <option value="completed" @if(request('status')=='completed') selected @endif>Completed</option>
-                <option value="cancelled" @if(request('status')=='cancelled') selected @endif>Cancelled</option>
-            </select>
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Food Item</label>
-            <select name="food_item_id" class="w-full border rounded px-2 py-1">
-                <option value="">All</option>
-                @foreach(auth()->user()->foodItems as $item)
-                    <option value="{{ $item->id }}" @if(request('food_item_id')==$item->id) selected @endif>{{ $item->title }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Order ID, Customer, etc." class="w-full border rounded px-2 py-1">
-        </div>
-        <button class="bg-blue-600 text-white px-4 py-2 rounded mt-2 md:mt-0 self-end">Filter</button>
-    </form>
-    <!-- Responsive Orders List -->
-    <div class="hidden md:block bg-white rounded shadow overflow-x-auto">
-        <table class="min-w-full">
-            <thead>
-                <tr class="bg-gray-100">
-                    <th class="px-4 py-2">Order ID</th>
-                    <th class="px-4 py-2">Food Item</th>
-                    <th class="px-4 py-2">Customer</th>
-                    <th class="px-4 py-2">Quantity</th>
-                    <th class="px-4 py-2">Status</th>
-                    <th class="px-4 py-2">Pickup Time</th>
-                    <th class="px-4 py-2">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($orders as $order)
-                    <tr>
-                        <td class="border px-4 py-2">{{ $order->id }}</td>
-                        <td class="border px-4 py-2">{{ $order->foodItem->title ?? '-' }}</td>
-                        <td class="border px-4 py-2">{{ $order->customer->name ?? '-' }}</td>
-                        <td class="border px-4 py-2">{{ $order->quantity }}</td>
-                        <td class="border px-4 py-2">{{ ucfirst($order->status) }}</td>
-                        <td class="border px-4 py-2">{{ $order->pickup_time ? \Carbon\Carbon::parse($order->pickup_time)->format('M d, Y g:i A') : 'Not set' }}</td>
-                        <td class="border px-4 py-2">
-                            <a href="{{ route('provider.orders.show', $order) }}" class="text-blue-600 hover:underline">View</a>
-                        </td>
-                    </tr>
-                @empty
-                    <tr><td colspan="7" class="text-center py-4">No orders found.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
-        <div class="p-4">{{ $orders->links() }}</div>
-    </div>
-    <!-- Mobile Card Layout -->
-    <div class="md:hidden space-y-4">
-        @forelse($orders as $order)
-            <div class="bg-white rounded-lg shadow p-4 flex flex-col gap-2">
-                <div class="flex justify-between items-center">
-                    <div class="font-bold text-lg">#{{ $order->id }}</div>
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                        @if($order->status === 'pending') bg-yellow-100 text-yellow-800
-                        @elseif($order->status === 'accepted') bg-blue-100 text-blue-800
-                        @elseif($order->status === 'preparing') bg-orange-100 text-orange-800
-                        @elseif($order->status === 'ready') bg-green-100 text-green-800
-                        @elseif($order->status === 'collected') bg-indigo-100 text-indigo-800
-                        @elseif($order->status === 'completed') bg-gray-100 text-gray-800
-                        @elseif($order->status === 'cancelled') bg-red-100 text-red-800
-                        @elseif($order->status === 'rejected') bg-red-200 text-red-900
-                        @endif">
-                        {{ ucfirst($order->status) }}
-                    </span>
-                </div>
-                <div class="text-gray-900 font-semibold">{{ $order->foodItem->title ?? '-' }}</div>
-                <div class="text-sm text-gray-500">Customer: {{ $order->customer->name ?? '-' }}</div>
-                <div class="text-sm text-gray-500">Quantity: {{ $order->quantity }}</div>
-                <div class="text-sm text-gray-500">Pickup: {{ $order->pickup_time ? \Carbon\Carbon::parse($order->pickup_time)->format('M d, Y g:i A') : 'Not set' }}</div>
-                <div class="flex gap-2 mt-2">
-                    <a href="{{ route('provider.orders.show', $order) }}" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-center py-2 rounded-lg font-semibold">View</a>
-                </div>
+<div class="max-w-7xl mx-auto mt-8 font-sans" x-data="orderBoard()">
+    <div class="flex flex-col md:flex-row gap-4 overflow-x-auto">
+        @php
+            $statuses = [
+                'pending' => ['New Orders', 'bg-yellow-50', 'text-yellow-700', 'ClockIcon'],
+                'preparing' => ['Preparing', 'bg-blue-50', 'text-blue-700', 'FireIcon'],
+                'ready' => ['Ready', 'bg-green-50', 'text-green-700', 'CheckCircleIcon'],
+                'completed' => ['Completed', 'bg-gray-50', 'text-gray-700', 'BadgeCheckIcon'],
+                'cancelled' => ['Cancelled', 'bg-red-50', 'text-red-700', 'XCircleIcon'],
+            ];
+            $icons = [
+                'ClockIcon' => '<svg class="w-5 h-5 mr-1 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>',
+                'FireIcon' => '<svg class="w-5 h-5 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 0C7.03 5 3 9.03 3 14c0 3.866 3.134 7 7 7s7-3.134 7-7c0-4.97-4.03-9-9-9z" /></svg>',
+                'CheckCircleIcon' => '<svg class="w-5 h-5 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>',
+                'BadgeCheckIcon' => '<svg class="w-5 h-5 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>',
+                'XCircleIcon' => '<svg class="w-5 h-5 mr-1 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>',
+            ];
+        @endphp
+        @foreach($statuses as $status => [$label, $bg, $text, $icon])
+        <div class="order-column flex-1 min-w-[260px] {{ $bg }} rounded-xl shadow-lg p-4 transition-all duration-200" data-status="{{ $status }}">
+            <div class="flex items-center font-bold text-lg mb-3 {{ $text }}">
+                {!! $icons[$icon] !!} {{ $label }}
             </div>
-        @empty
-            <div class="text-center text-gray-400 py-12">No orders found.</div>
-        @endforelse
-        <div class="p-4">{{ $orders->links() }}</div>
+            <div class="space-y-3 min-h-[80px]" id="orders-{{ $status }}">
+                @if(isset($orders[$status]))
+                    @foreach($orders[$status] as $order)
+                        <div class="order-card bg-white rounded-lg shadow hover:shadow-xl p-4 cursor-move border-l-4 border-transparent hover:border-blue-400 transition-all duration-150 group" data-order-id="{{ $order->id }}">
+                            <div class="flex items-center justify-between">
+                                <div class="font-semibold text-base text-gray-800">Order #{{ $order->id }}</div>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $text }} bg-opacity-10 {{ $bg }}">
+                                    {!! $icons[$icon] !!} {{ ucfirst($status) }}
+                                </span>
+                            </div>
+                            <div class="text-sm text-gray-600 mt-1 flex items-center">
+                                <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.485 0 4.847.657 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                {{ $order->customer->name ?? 'N/A' }}
+                            </div>
+                            <div class="text-xs text-gray-400 mt-1 flex items-center">
+                                <svg class="w-4 h-4 mr-1 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 4h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2z" /></svg>
+                                {{ $order->created_at->diffForHumans() }}
+                            </div>
+                            <button @click="showOrder({{ $order->id }})" class="mt-3 text-blue-600 hover:underline text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 rounded transition">Details</button>
+                        </div>
+                    @endforeach
+                @endif
+            </div>
+        </div>
+        @endforeach
+    </div>
+    <!-- Order Details Modal -->
+    <div x-show="modalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 transition-opacity duration-200">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-2 p-6 relative animate-fade-in" @click.away="closeModal()" @keydown.escape.window="closeModal()" tabindex="0">
+            <button @click="closeModal()" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <template x-if="loading">
+                <div class="text-center py-8">
+                    <svg class="animate-spin h-8 w-8 text-blue-600 mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                    <div class="text-gray-600">Loading...</div>
+                </div>
+            </template>
+            <template x-if="error">
+                <div class="text-center py-8 text-red-600">Failed to load order details.</div>
+            </template>
+            <template x-if="!loading && !error && order">
+                <div class="space-y-2">
+                    <h2 class="text-2xl font-bold mb-2 text-blue-700 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        Order #<span x-text="order.id"></span>
+                    </h2>
+                    <div class="flex items-center text-gray-700"><svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.485 0 4.847.657 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" /></svg> <span x-text="order.customer?.name ?? 'N/A'"></span></div>
+                    <div class="flex items-center text-gray-700"><svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 4h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2z" /></svg> <span x-text="order.created_at"></span></div>
+                    <div class="flex items-center text-gray-700"><svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V7a2 2 0 00-2-2h-4V3a1 1 0 00-2 0v2H6a2 2 0 00-2 2v6" /></svg> <span x-text="order.food_item?.title ?? 'N/A'"></span></div>
+                    <div class="flex items-center text-gray-700"><svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V5a1 1 0 00-1-1H9a1 1 0 00-1 1v6m8 0a4 4 0 01-8 0" /></svg> <span x-text="order.quantity"></span></div>
+                    <div class="flex items-center text-gray-700"><svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 4h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2z" /></svg> <span x-text="order.pickup_time ?? 'Not set'"></span></div>
+                    <div class="flex items-center text-gray-700"><svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V10a2 2 0 012-2h2" /></svg> <span x-text="order.customer_notes ?? '-' "></span></div>
+                    <div class="mt-4">
+                        <a :href="`/provider/orders/${order.id}`" class="text-blue-600 hover:underline text-sm">View Full Details</a>
+                    </div>
+                </div>
+            </template>
+        </div>
     </div>
 </div>
+<script>
+function orderBoard() {
+    return {
+        modalOpen: false,
+        loading: false,
+        error: false,
+        order: null,
+        showOrder(orderId) {
+            this.modalOpen = true;
+            this.loading = true;
+            this.error = false;
+            this.order = null;
+            fetch(`/provider/orders/${orderId}`)
+                .then(res => {
+                    if (!res.ok) throw new Error('Failed to load');
+                    return res.text();
+                })
+                .then(html => {
+                    // Try to extract JSON from a <script type="application/json" id="order-json"> tag in the show view
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const jsonScript = doc.getElementById('order-json');
+                    if (jsonScript) {
+                        this.order = JSON.parse(jsonScript.textContent);
+                        this.loading = false;
+                    } else {
+                        throw new Error('No order data');
+                    }
+                })
+                .catch(() => {
+                    this.loading = false;
+                    this.error = true;
+                });
+        },
+        closeModal() {
+            this.modalOpen = false;
+        },
+        init() {
+            document.querySelectorAll('.order-column .space-y-3').forEach(column => {
+                new Sortable(column, {
+                    group: 'orders',
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    onEnd: (evt) => {
+                        const orderId = evt.item.dataset.orderId;
+                        const newStatus = evt.to.parentElement.dataset.status;
+                        evt.item.classList.add('opacity-50');
+                        fetch(`/provider/orders/${orderId}/status`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                'Accept': 'application/json',
+                            },
+                            body: JSON.stringify({ status: newStatus })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            evt.item.classList.remove('opacity-50');
+                            if (!data.success) {
+                                alert('Failed to update order status.');
+                            }
+                        })
+                        .catch(() => {
+                            evt.item.classList.remove('opacity-50');
+                            alert('Failed to update order status.');
+                        });
+                    }
+                });
+            });
+        }
+    }
+}
+document.addEventListener('alpine:init', () => {
+    Alpine.data('orderBoard', orderBoard);
+});
+</script>
 @endsection 

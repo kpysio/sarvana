@@ -76,8 +76,22 @@ class FoodItemController extends Controller
      */
     public function show(FoodItem $foodItem)
     {
+        $this->authorize('view', $foodItem);
         $foodItem->load(['provider', 'tags', 'reviews.reviewer']);
         return view('food-items.show', compact('foodItem'));
+    }
+
+    /**
+     * Display the specified food item for customers/public.
+     */
+    public function publicShow(FoodItem $foodItem)
+    {
+        // Only show if active/available
+        if ($foodItem->status !== 'active') {
+            abort(404);
+        }
+        $foodItem->load(['provider', 'tags', 'reviews.reviewer']);
+        return view('customers.food-items.show', compact('foodItem'));
     }
 
     /**

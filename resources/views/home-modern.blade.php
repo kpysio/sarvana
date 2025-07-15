@@ -1,5 +1,5 @@
 <!-- Hero Section -->
-<section class="hero-gradient text-white section-padding relative overflow-hidden">
+<section class="hero-gradient text-white section-padding relative overflow-hidden" id="hero">
     <div class="max-w-7xl mx-auto relative z-10">
         <div class="grid md:grid-cols-2 gap-12 items-center">
             <div class="fade-in">
@@ -43,7 +43,7 @@
     <div class="absolute bottom-20 left-20 w-24 h-24 bg-yellow-300/20 rounded-full blur-2xl"></div>
 </section>
 <!-- How It Works Section -->
-<section class="section-padding bg-gray-50">
+<section class="section-padding bg-gray-50" id="how-it-works">
     <div class="max-w-7xl mx-auto">
         <div class="text-center mb-16">
             <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">How It Works</h2>
@@ -83,7 +83,7 @@
     </div>
 </section>
 <!-- Stories Section -->
-<section class="section-padding">
+<section class="section-padding" id="stories">
     <div class="max-w-7xl mx-auto">
         <div class="text-center mb-16">
             <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Community Stories</h2>
@@ -156,7 +156,7 @@
     </div>
 </section>
 <!-- Help Community Section -->
-<section class="section-padding community-gradient">
+<section class="section-padding community-gradient" id="help">
     <div class="max-w-7xl mx-auto">
         <div class="grid md:grid-cols-2 gap-12 items-center">
             <div>
@@ -195,7 +195,7 @@
     </div>
 </section>
 <!-- Help House Cooks Section -->
-<section class="section-padding bg-gray-50">
+<section class="section-padding bg-gray-50" id="for-cooks">
     <div class="max-w-7xl mx-auto">
         <div class="grid md:grid-cols-2 gap-12 items-center">
             <div class="order-2 md:order-1">
@@ -239,7 +239,7 @@
                         </div>
                     </div>
                 </div>
-                <button class="cook-gradient text-white px-8 py-4 rounded-lg font-semibold text-lg hover:opacity-90 transition-opacity">
+                <button onclick="window.location.href='{{ route('register.provider') }}'" class="cook-gradient text-white px-8 py-4 rounded-lg font-semibold text-lg hover:opacity-90 transition-opacity">
                     <i class="fas fa-chef-hat mr-2"></i>
                     Start Cooking Today
                 </button>
@@ -378,8 +378,8 @@
             <div>
                 <h4 class="font-semibold mb-4">For Customers</h4>
                 <ul class="space-y-2 text-gray-400">
-                    <li><a href="#" class="hover:text-white transition-colors">How it Works</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">Find Food</a></li>
+                    <li><a href="#how-it-works" class="hover:text-white transition-colors">How it Works</a></li>
+                    <li><a href="#hero" class="hover:text-white transition-colors">Find Food</a></li>
                     <li><a href="#" class="hover:text-white transition-colors">Safety</a></li>
                     <li><a href="#" class="hover:text-white transition-colors">Help Center</a></li>
                 </ul>
@@ -387,7 +387,7 @@
             <div>
                 <h4 class="font-semibold mb-4">For Cooks</h4>
                 <ul class="space-y-2 text-gray-400">
-                    <li><a href="#" class="hover:text-white transition-colors">Start Cooking</a></li>
+                    <li><a href="#for-cooks" class="hover:text-white transition-colors">Start Cooking</a></li>
                     <li><a href="#" class="hover:text-white transition-colors">Cook Resources</a></li>
                     <li><a href="#" class="hover:text-white transition-colors">Guidelines</a></li>
                     <li><a href="#" class="hover:text-white transition-colors">Support</a></li>
