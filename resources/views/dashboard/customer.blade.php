@@ -93,7 +93,7 @@
                                 <div>
                                     <div class="font-semibold text-lg text-gray-900">{{ $order->foodItem->title }}</div>
                                     <div class="text-sm text-gray-500">From {{ $order->provider->name }}</div>
-                                    <div class="text-xs text-gray-400">Pickup: {{ $order->pickup_time->format('M d, Y g:i A') }}</div>
+                                    <div class="text-xs text-gray-400">Pickup: {{ $order->pickup_time ? $order->pickup_time->format('M d, Y g:i A') : 'Not set' }}</div>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2 mt-2">

@@ -47,6 +47,10 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
+                    <a href="{{ route('search.index') }}" class="text-white bg-green-600 hover:bg-green-700 font-semibold px-4 py-2 rounded-lg flex items-center gap-2 shadow transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/></svg>
+                        Find Food
+                    </a>
                     <a href="{{ route('login') }}" class="text-gray-600 hover:text-purple-600 font-medium">Login</a>
                     <a href="{{ route('register') }}" class="hero-gradient text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity">Sign Up</a>
                     <a href="{{ route('register.provider') }}" class="border-2 border-purple-600 text-purple-600 px-4 py-2 rounded-lg font-medium hover:bg-purple-50 transition-colors ml-2">Provider Sign Up</a>

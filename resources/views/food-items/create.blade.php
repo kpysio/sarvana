@@ -86,6 +86,45 @@
                             <x-input-error :messages="$errors->get('expiry_date')" class="mt-2" />
                         </div>
                     @endif
+                    <!-- Tag Selector -->
+                    <div class="md:col-span-2">
+                        <x-input-label for="tags" :value="__('Tags')" />
+                        <div x-data="tagSelector({
+                            allTags: @json($tags),
+                            selected: [],
+                            search: '',
+                        })" class="mt-1 relative">
+                            <div class="flex flex-wrap gap-2 mb-2">
+                                <template x-for="tag in selectedTags" :key="tag.id">
+                                    <span class="inline-flex items-center px-2 py-1 rounded bg-blue-100 text-blue-800 text-xs font-medium" :style="tag.color ? 'background:' + tag.color + '20; color:' + tag.color : ''">
+                                        <span class="w-2 h-2 rounded-full mr-1 inline-block align-middle" :style="'background:' + tag.color"></span>
+                                        <span x-text="tag.icon + ' ' + tag.name"></span>
+                                        <button type="button" class="ml-1 text-blue-500 hover:text-blue-700" @click="removeTag(tag)">&times;</button>
+                                        <input type="hidden" name="tags[]" :value="tag.id">
+                                    </span>
+                                </template>
+                            </div>
+                            <input type="text" x-model="search" placeholder="Search tags..." class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" @focus="showDropdown = true" @keydown.arrow-down.prevent="moveHighlight(1)" @keydown.arrow-up.prevent="moveHighlight(-1)" @keydown.enter.prevent="selectHighlighted()" @keydown.esc="showDropdown = false" @blur="setTimeout(() => showDropdown = false, 100)">
+                            <div x-show="showDropdown && groupedFilteredTags.length > 0" class="absolute z-10 bg-white border border-gray-200 rounded-md mt-1 w-full shadow-lg max-h-48 overflow-auto">
+                                <template x-for="(tags, category) in groupedFilteredTags" :key="category">
+                                    <div>
+                                        <div class="px-3 py-1 text-xs font-semibold text-gray-500 bg-gray-50" x-text="category"></div>
+                                        <template x-for="(tag, idx) in tags" :key="tag.id">
+                                            <div class="px-3 py-2 cursor-pointer flex items-center gap-2 hover:bg-blue-50"
+                                                :class="{ 'bg-blue-100': isHighlighted(category, idx) }"
+                                                @mousedown.prevent="addTag(tag)"
+                                                @mouseenter="highlighted = { category, idx }">
+                                                <span class="w-2 h-2 rounded-full inline-block" :style="'background:' + tag.color"></span>
+                                                <span x-text="tag.icon"></span>
+                                                <span x-text="tag.name"></span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                        <x-input-error :messages="$errors->get('tags')" class="mt-2" />
+                    </div>
                     <!-- Photos -->
                     <div class="md:col-span-2">
                         <x-input-label for="photos" :value="__('Photos')" />
@@ -109,6 +148,67 @@
 @endsection
 
 <script>
+// Make tagSelector globally available for Alpine
+window.tagSelector = function({ allTags, selected = [], search = '' }) {
+    return {
+        allTags,
+        selectedTags: selected,
+        search,
+        showDropdown: false,
+        highlighted: { category: null, idx: 0 },
+        get groupedFilteredTags() {
+            const groups = {};
+            const search = (this.search || '').toLowerCase().trim();
+            this.allTags.forEach(tag => {
+                if (!tag.name) return;
+                if (this.selectedTags.some(t => t.id === tag.id)) return;
+                if (
+                    search &&
+                    !(
+                        tag.name.toLowerCase().includes(search) ||
+                        (tag.icon && tag.icon.toLowerCase().includes(search)) ||
+                        (tag.category && tag.category.toLowerCase().includes(search))
+                    )
+                ) return;
+                if (!groups[tag.category]) groups[tag.category] = [];
+                groups[tag.category].push(tag);
+            });
+            return groups;
+        },
+        addTag(tag) {
+            if (!this.selectedTags.some(t => t.id === tag.id)) {
+                this.selectedTags.push(tag);
+            }
+            this.search = '';
+            this.showDropdown = false;
+        },
+        removeTag(tag) {
+            this.selectedTags = this.selectedTags.filter(t => t.id !== tag.id);
+        },
+        moveHighlight(dir) {
+            const flat = [];
+            Object.entries(this.groupedFilteredTags).forEach(([category, tags]) => {
+                tags.forEach((tag, idx) => flat.push({ category, idx, tag }));
+            });
+            if (!flat.length) return;
+            let current = flat.findIndex(f => this.highlighted.category === f.category && this.highlighted.idx === f.idx);
+            let next = current + dir;
+            if (next < 0) next = flat.length - 1;
+            if (next >= flat.length) next = 0;
+            this.highlighted = { category: flat[next].category, idx: flat[next].idx };
+        },
+        selectHighlighted() {
+            const group = this.groupedFilteredTags[this.highlighted.category];
+            if (group && group[this.highlighted.idx]) {
+                this.addTag(group[this.highlighted.idx]);
+            }
+        },
+        isHighlighted(category, idx) {
+            return this.highlighted.category === category && this.highlighted.idx === idx;
+        },
+    };
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     function toggleExpiryField() {
         const orderType = document.getElementById('order_type').value;

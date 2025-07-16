@@ -31,10 +31,10 @@
                 <!-- Pills & View Toggle -->
                 <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mt-4 md:mt-0">
                     <!-- Filter Pills -->
-                    <div class="flex flex-wrap gap-2">
+                    <!-- <div class="flex flex-wrap gap-2">
                         <button class="filter-btn px-3 py-1 rounded-full border text-sm {{ request('value') ? 'bg-green-500 text-white border-green-500' : 'bg-gray-100 border-gray-300' }}" onclick="window.location='?value=1'">Great Value for Money</button>
                         <button class="filter-btn px-3 py-1 rounded-full border text-sm {{ request('top') ? 'bg-yellow-400 text-gray-900 border-yellow-400' : 'bg-gray-100 border-gray-300' }}" onclick="window.location='?top=1'">Top Rated Deals</button>
-                    </div>
+                    </div> -->
                     <!-- View Toggle -->
                     <div class="flex items-center ml-2">
                         <button id="gridBtn" class="view-btn px-2 py-1 rounded {{ !request('view') || request('view')=='grid' ? 'bg-white shadow' : '' }}" onclick="setView('grid')">⊞</button>

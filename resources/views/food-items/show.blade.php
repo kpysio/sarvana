@@ -13,7 +13,145 @@
         </div>
     </div>
 </div>
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+{{-- Order Analysis and Status Breakdown --}}
+<div class="mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div class="bg-white p-6 rounded-lg shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Total Orders</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ number_format($orderStats['total_orders']) }}</p>
+                </div>
+                <div class="p-3 bg-blue-100 rounded-full">
+                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4">
+                <p class="text-sm text-gray-500">Completion Rate</p>
+                <p class="text-xl font-semibold text-gray-900">{{ number_format($orderStats['completion_rate'], 1) }}%</p>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Completed Orders</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ number_format($orderStats['completed_orders']) }}</p>
+                </div>
+                <div class="p-3 bg-green-100 rounded-full">
+                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4">
+                <p class="text-sm text-gray-500">Success Rate</p>
+                <p class="text-xl font-semibold text-gray-900">{{ $orderStats['total_orders'] ? number_format(($orderStats['completed_orders'] / $orderStats['total_orders']) * 100, 1) : '0.0' }}%</p>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Pending Orders</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ number_format($orderStats['pending_orders']) }}</p>
+                </div>
+                <div class="p-3 bg-yellow-100 rounded-full">
+                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4">
+                <p class="text-sm text-gray-500">Pending Rate</p>
+                <p class="text-xl font-semibold text-gray-900">{{ $orderStats['total_orders'] ? number_format(($orderStats['pending_orders'] / $orderStats['total_orders']) * 100, 1) : '0.0' }}%</p>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Cancelled Orders</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ number_format($orderStats['cancelled_orders']) }}</p>
+                </div>
+                <div class="p-3 bg-red-100 rounded-full">
+                    <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4">
+                <p class="text-sm text-gray-500">Cancellation Rate</p>
+                <p class="text-xl font-semibold text-gray-900">{{ $orderStats['total_orders'] ? number_format(($orderStats['cancelled_orders'] / $orderStats['total_orders']) * 100, 1) : '0.0' }}%</p>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow mb-8">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Order Status Breakdown</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            @php $totalOrders = $orderStats['total_orders']; @endphp
+            @foreach($orderStatusBreakdown as $status => $count)
+            <div class="text-center p-4 rounded-lg
+                @if($status === 'completed') bg-green-50 border border-green-200
+                @elseif($status === 'pending') bg-yellow-50 border border-yellow-200
+                @elseif($status === 'cancelled') bg-red-50 border border-red-200
+                @else bg-gray-50 border border-gray-200
+                @endif">
+                <div class="text-2xl font-bold
+                    @if($status === 'completed') text-green-600
+                    @elseif($status === 'pending') text-yellow-600
+                    @elseif($status === 'cancelled') text-red-600
+                    @else text-gray-600
+                    @endif">
+                    {{ number_format($count) }}
+                </div>
+                <div class="text-sm font-medium text-gray-700 capitalize">{{ $status }}</div>
+                <div class="text-xs text-gray-500">{{ $totalOrders ? number_format(($count / $totalOrders) * 100, 1) : '0.0' }}%</div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</div>
+<!-- Inventory Item Quantity Breakdown -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white p-6 rounded-lg shadow flex flex-col items-center">
+        <div class="p-3 bg-blue-100 rounded-full mb-2">
+            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18" />
+            </svg>
+        </div>
+        <div class="text-sm font-medium text-gray-600">Total Quantity</div>
+        <div class="text-2xl font-bold text-gray-900">{{ $inventoryBreakdown['total'] }}</div>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow flex flex-col items-center">
+        <div class="p-3 bg-yellow-100 rounded-full mb-2">
+            <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3" />
+            </svg>
+        </div>
+        <div class="text-sm font-medium text-gray-600">Ordered</div>
+        <div class="text-2xl font-bold text-gray-900">{{ $inventoryBreakdown['ordered'] }}</div>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow flex flex-col items-center">
+        <div class="p-3 bg-green-100 rounded-full mb-2">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+        </div>
+        <div class="text-sm font-medium text-gray-600">Remaining</div>
+        <div class="text-2xl font-bold text-gray-900">{{ $inventoryBreakdown['remaining'] }}</div>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow flex flex-col items-center">
+        <div class="p-3 bg-purple-100 rounded-full mb-2">
+            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2" />
+            </svg>
+        </div>
+        <div class="text-sm font-medium text-gray-600">Order Rate</div>
+        <div class="text-2xl font-bold text-gray-900">{{ number_format($inventoryBreakdown['order_rate'], 1) }}%</div>
+    </div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
     <!-- Food Item Information -->
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
         <h3 class="text-lg font-semibold text-gray-800 mb-4">Food Item Information</h3>
@@ -35,7 +173,7 @@
                 <p class="text-gray-900">£{{ $foodItem->price }}</p>
             </div>
             <div>
-                <label class="text-sm font-medium text-gray-500">Available Quantity</label>
+                <label class="text-sm font-medium text-gray-500">Remaining Quantity</label>
                 <p class="text-gray-900">{{ $foodItem->available_quantity }}</p>
             </div>
             <div>
@@ -127,6 +265,20 @@
             </form>
         </div>
     </div>
+    <!-- Tags Card -->
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Tags</h3>
+        <div class="flex flex-wrap gap-2">
+            @forelse($foodItem->tags as $tag)
+                <div class="flex items-center gap-2 px-3 py-2 rounded shadow text-sm font-semibold" style="background: {{ $tag->color ?? '#f3f4f6' }}; color: #222; min-width: 120px;">
+                    <span class="text-lg">{{ $tag->icon }}</span>
+                    <span>{{ $tag->name }}</span>
+                </div>
+            @empty
+                <span class="text-gray-500">No tags applied.</span>
+            @endforelse
+        </div>
+    </div>
 </div>
 <!-- Add Notes Card -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -176,4 +328,5 @@
     <p class="text-gray-500">No orders found for this item.</p>
     @endif
 </div>
+
 @endsection 

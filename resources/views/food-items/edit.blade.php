@@ -9,7 +9,9 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <form method="POST" action="{{ route('food-items.update', $foodItem) }}" enctype="multipart/form-data">
+                    {{-- Remove PHP debug output --}}
+                    {{-- <div class="mb-4 p-2 bg-yellow-100 text-xs text-gray-700 rounded">Debug: Tags = <pre>@json($tags)</pre></div> --}}
+                    <form method="POST" action="{{ auth()->user() && auth()->user()->user_type === 'provider' ? route('provider.food-items.update', $foodItem) : route('food-items.update', $foodItem) }}" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
@@ -128,10 +130,58 @@
                                     <x-input-error :messages="$errors->get('order_type')" class="mt-2" />
                                 </div>
                             @endif
+
+                            <!-- Tag Selector (Dual List Drag-and-Drop) -->
+                            <div class="md:col-span-2">
+                                <x-input-label for="tags" :value="__('Tags')" />
+                                <div x-data='dualTagSelector({ allTags: @json($tags), selected: @json($foodItem->tags->toArray()), search: "" })' class="mt-1 flex flex-col md:flex-row gap-4">
+                                    {{-- Remove Alpine.js debug output for groupedFilteredTags --}}
+                                    <!-- Available Tags -->
+                                    <div class="flex-1 min-w-[220px]">
+                                        <div class="font-semibold text-gray-700 mb-2">Available Tags</div>
+                                        <input type="text" x-model="search" placeholder="Search tags..." class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm mb-2">
+                                        <div class="bg-gray-50 border rounded-md p-2 min-h-[120px] max-h-64 overflow-auto" id="available-tags">
+                                            <template x-for="(tags, category) in groupedFilteredTags" :key="category">
+                                                <div>
+                                                    <div class="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-100" x-text="category"></div>
+                                                    <template x-for="tag in tags" :key="tag.id">
+                                                        <div class="draggable-tag flex items-center gap-2 px-2 py-1 my-1 rounded cursor-move bg-white border hover:bg-blue-50"
+                                                            :style="tag.color ? 'border-left: 4px solid ' + tag.color : ''"
+                                                            :data-id="tag.id"
+                                                            @click="addTag(tag)">
+                                                            <span class="w-2 h-2 rounded-full inline-block" :style="'background:' + tag.color"></span>
+                                                            <span x-text="tag.icon"></span>
+                                                            <span x-text="tag.name"></span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                    <!-- Applied Tags -->
+                                    <div class="flex-1 min-w-[220px]">
+                                        <div class="font-semibold text-gray-700 mb-2">Applied Tags</div>
+                                        <div class="bg-gray-50 border rounded-md p-2 min-h-[120px] max-h-64 overflow-auto" id="applied-tags">
+                                            <template x-for="tag in selectedTags" :key="tag.id">
+                                                <div class="draggable-tag flex items-center gap-2 px-2 py-1 my-1 rounded cursor-move bg-blue-100 border border-blue-200 text-blue-800"
+                                                    :style="tag.color ? 'border-left: 4px solid ' + tag.color + '; color:' + tag.color : ''"
+                                                    :data-id="tag.id"
+                                                    @click="removeTag(tag)">
+                                                    <span class="w-2 h-2 rounded-full inline-block" :style="'background:' + tag.color"></span>
+                                                    <span x-text="tag.icon"></span>
+                                                    <span x-text="tag.name"></span>
+                                                    <input type="hidden" name="tags[]" :value="tag.id">
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                                <x-input-error :messages="$errors->get('tags')" class="mt-2" />
+                            </div>
                         </div>
 
                         <div class="flex items-center justify-end mt-6">
-                            <a href="{{ route('food-items.show', $foodItem) }}" class="text-gray-600 hover:text-gray-800 mr-4">
+                            <a href="{{ auth()->user() && auth()->user()->user_type === 'provider' ? route('provider.food-items.show', $foodItem) : route('food-items.show', $foodItem) }}" class="text-gray-600 hover:text-gray-800 mr-4">
                                 Cancel
                             </a>
                             <x-primary-button>
@@ -143,4 +193,86 @@
             </div>
         </div>
     </div>
-</x-app-layout> 
+</x-app-layout>
+
+{{-- Ensure Alpine.js is loaded before this script --}}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+{{-- If Alpine.js is not already loaded globally, add it here: --}}
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script>
+window.dualTagSelector = function({ allTags, selected = [], search = '' }) {
+    return {
+        allTags,
+        selectedTags: selected,
+        search,
+        get groupedFilteredTags() {
+            const groups = {};
+            const search = (this.search || '').toLowerCase().trim();
+            this.allTags.forEach(tag => {
+                if (!tag.name) return;
+                if (this.selectedTags.some(t => t.id === tag.id)) return;
+                if (
+                    search &&
+                    !(
+                        tag.name.toLowerCase().includes(search) ||
+                        (tag.icon && tag.icon.toLowerCase().includes(search)) ||
+                        (tag.category && tag.category.toLowerCase().includes(search))
+                    )
+                ) return;
+                if (!groups[tag.category]) groups[tag.category] = [];
+                groups[tag.category].push(tag);
+            });
+            return groups;
+        },
+        addTag(tag) {
+            if (!this.selectedTags.some(t => t.id === tag.id)) {
+                this.selectedTags.push(tag);
+            }
+        },
+        removeTag(tag) {
+            this.selectedTags = this.selectedTags.filter(t => t.id !== tag.id);
+        },
+        init() {
+            const self = this;
+            // Available Tags Drag
+            new Sortable(document.getElementById('available-tags'), {
+                group: {
+                    name: 'tags',
+                    pull: 'clone',
+                    put: false
+                },
+                sort: false,
+                animation: 150,
+                onEnd(evt) {
+                    const tagId = evt.item.getAttribute('data-id');
+                    const tag = self.allTags.find(t => t.id == tagId);
+                    if (tag) self.addTag(tag);
+                }
+            });
+            // Applied Tags Drag
+            new Sortable(document.getElementById('applied-tags'), {
+                group: {
+                    name: 'tags',
+                    pull: true,
+                    put: true
+                },
+                animation: 150,
+                onEnd(evt) {
+                    if (evt.to === evt.from && evt.oldIndex !== evt.newIndex) {
+                        // Reorder within applied tags
+                        const moved = self.selectedTags.splice(evt.oldIndex, 1)[0];
+                        self.selectedTags.splice(evt.newIndex, 0, moved);
+                    } else if (evt.from.id === 'applied-tags' && evt.to.id === 'available-tags') {
+                        // Remove from applied tags
+                        const tagId = evt.item.getAttribute('data-id');
+                        self.removeTag(self.selectedTags.find(t => t.id == tagId));
+                    }
+                }
+            });
+        }
+    };
+}
+document.addEventListener('alpine:init', () => {
+    Alpine.data('dualTagSelector', window.dualTagSelector);
+});
+</script> 

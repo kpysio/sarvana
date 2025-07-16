@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\FoodItem;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Tag;
 
 class FoodItemController extends Controller
 {
@@ -19,7 +20,8 @@ class FoodItemController extends Controller
     // Show the form for creating a new food item
     public function create()
     {
-        return view('food-items.create');
+        $tags = Tag::all();
+        return view('food-items.create', compact('tags'));
     }
 
 
@@ -55,7 +57,8 @@ class FoodItemController extends Controller
     public function edit(FoodItem $foodItem)
     {
         $this->authorize('update', $foodItem);
-        return view('food-items.edit', compact('foodItem'));
+        $tags = Tag::all();
+        return view('food-items.edit', compact('foodItem', 'tags'));
     }
 
     // Update the specified food item
@@ -71,6 +74,10 @@ class FoodItemController extends Controller
             'expiry_date' => 'nullable|date',
         ]);
         $foodItem->update($validated);
+        // Sync tags if present in the request
+        if ($request->has('tags')) {
+            $foodItem->tags()->sync($request->input('tags'));
+        }
         return redirect()->route('provider.food-items.index')->with('success', 'Food item updated successfully!');
     }
 
@@ -78,7 +85,27 @@ class FoodItemController extends Controller
     public function show(FoodItem $foodItem)
     {
         $this->authorize('view', $foodItem);
-        return view('food-items.show', compact('foodItem'));
+        $orders = $foodItem->orders()->with('customer')->get();
+        $orderStats = [
+            'total_orders' => $orders->count(),
+            'completed_orders' => $orders->where('status', 'completed')->count(),
+            'pending_orders' => $orders->where('status', 'pending')->count(),
+            'cancelled_orders' => $orders->where('status', 'cancelled')->count(),
+            'completion_rate' => $orders->count() ? ($orders->where('status', 'completed')->count() / $orders->count()) * 100 : 0,
+        ];
+        $orderStatusBreakdown = $orders->groupBy('status')->map->count();
+        // Inventory breakdown
+        $totalQuantity = $foodItem->available_quantity + $orders->sum('quantity');
+        $orderedQuantity = $orders->sum('quantity');
+        $remainingQuantity = $foodItem->available_quantity;
+        $orderRate = $totalQuantity > 0 ? ($orderedQuantity / $totalQuantity) * 100 : 0;
+        $inventoryBreakdown = [
+            'total' => $totalQuantity,
+            'ordered' => $orderedQuantity,
+            'remaining' => $remainingQuantity,
+            'order_rate' => $orderRate,
+        ];
+        return view('food-items.show', compact('foodItem', 'orders', 'orderStats', 'orderStatusBreakdown', 'inventoryBreakdown'));
     }
 
     // Remove the specified food item
