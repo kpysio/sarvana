@@ -1,12 +1,12 @@
 @extends('layouts.provider')
 
 @section('content')
-<div class="max-w-3xl mx-auto">
+<div>
     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-        <div class="p-6">
+        <div class="p-4">
             <form method="POST" action="{{ auth()->user() && auth()->user()->user_type === 'provider' ? route('provider.food-items.store') : route('food-items.store') }}" enctype="multipart/form-data">
                 @csrf
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Title -->
                     <div class="md:col-span-2">
                         <x-input-label for="title" :value="__('Title')" />
@@ -133,7 +133,7 @@
                         <x-input-error :messages="$errors->get('photos.*')" class="mt-2" />
                     </div>
                 </div>
-                <div class="flex items-center justify-end mt-6">
+                <div class="flex items-center justify-end mt-4">
                     <a href="{{ route('provider.food-items.index') }}" class="text-gray-600 hover:text-gray-800 mr-4">
                         Cancel
                     </a>

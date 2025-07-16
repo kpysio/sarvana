@@ -50,7 +50,7 @@
     <div class="flex-1 flex flex-col min-h-screen">
         <!-- Topbar -->
         <header class="bg-white dark:bg-gray-800 shadow flex items-center justify-between px-6 h-16">
-            <!-- Search (optional, can be replaced by page content) -->
+            <!-- Search -->
             <div class="flex items-center w-1/2">
                 <input type="text" placeholder="Search..." class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700">
             </div>
@@ -65,6 +65,48 @@
                         <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"/></svg>
                     </template>
                 </button>
+                <!-- Notifications Dropdown (copy from admin layout, but use provider context if needed) -->
+                <div x-data="{ open: false }" class="relative">
+                    <button @click="open = !open" class="relative focus:outline-none">
+                        <svg class="w-6 h-6 text-gray-600 dark:text-gray-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs px-1">3</span>
+                    </button>
+                    <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 shadow-lg rounded-lg z-50" x-cloak>
+                        <div class="flex items-center justify-between p-4 border-b dark:border-gray-700 font-semibold">
+                            <span>Notifications</span>
+                            <button class="text-xs text-green-600 hover:underline" @click="/* mark all as read logic */">Mark all as read</button>
+                        </div>
+                        <ul class="max-h-80 overflow-y-auto">
+                            <!-- Example notification items -->
+                            <li class="flex items-start p-4 hover:bg-gray-100 dark:hover:bg-gray-700 border-b dark:border-gray-700">
+                                <span class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3"></span>
+                                <div class="flex-1">
+                                    <a href="#" class="font-semibold text-gray-800 dark:text-gray-100">New order received</a>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">2 min ago</div>
+                                </div>
+                            </li>
+                            <li class="flex items-start p-4 hover:bg-gray-100 dark:hover:bg-gray-700 border-b dark:border-gray-700 opacity-60">
+                                <span class="w-2 h-2 bg-gray-400 rounded-full mt-2 mr-3"></span>
+                                <div class="flex-1">
+                                    <a href="#" class="text-gray-700 dark:text-gray-300">Food item approved</a>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">10 min ago</div>
+                                </div>
+                            </li>
+                            <li class="flex items-start p-4 hover:bg-gray-100 dark:hover:bg-gray-700 border-b dark:border-gray-700">
+                                <span class="w-2 h-2 bg-yellow-500 rounded-full mt-2 mr-3"></span>
+                                <div class="flex-1">
+                                    <a href="#" class="font-semibold text-gray-800 dark:text-gray-100">Order completed</a>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">30 min ago</div>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="p-2 text-center">
+                            <a href="#" class="text-green-600 hover:underline text-sm">View all notifications</a>
+                        </div>
+                    </div>
+                </div>
                 <!-- User Menu -->
                 <div x-data="{ open: false }" class="relative">
                     <button @click="open = !open" class="flex items-center focus:outline-none">

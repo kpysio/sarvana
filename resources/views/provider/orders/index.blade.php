@@ -4,7 +4,7 @@
 <!-- Add SortableJS and canvas-confetti CDN -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-<div class="max-w-7xl mx-auto mt-8 font-sans">
+<div class="mt-8 font-sans">
     <div class="flex flex-col md:flex-row gap-4 overflow-x-auto">
         @php
             $statuses = [
@@ -23,14 +23,14 @@
             ];
         @endphp
         @foreach($statuses as $status => [$label, $bg, $text, $icon])
-        <div class="order-column flex-1 min-w-[260px] {{ $bg }} rounded-xl shadow-lg p-4 transition-all duration-200" data-status="{{ $status }}">
+        <div class="order-column flex-1 min-w-[260px] {{ $bg }} rounded-xl shadow-md p-4 transition-all duration-200" data-status="{{ $status }}">
             <div class="flex items-center font-bold text-lg mb-3 {{ $text }}">
                 {!! $icons[$icon] !!} {{ $label }}
             </div>
             <div class="space-y-3 min-h-[80px]" id="orders-{{ $status }}">
                 @if(isset($orders[$status]))
                     @foreach($orders[$status] as $order)
-                        <div class="order-card bg-white rounded-lg shadow hover:shadow-xl p-4 cursor-move border-l-4 border-transparent hover:border-blue-400 transition-all duration-150 group" data-order-id="{{ $order->id }}">
+                        <div class="order-card bg-white rounded-xl shadow-md hover:shadow-xl p-4 cursor-move border-l-4 border-transparent hover:border-blue-400 transition-all duration-150 group" data-order-id="{{ $order->id }}">
                             <div class="flex items-center justify-between">
                                 <div class="font-semibold text-base text-gray-800">Order #{{ $order->id }}</div>
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $text }} bg-opacity-10 {{ $bg }}">
