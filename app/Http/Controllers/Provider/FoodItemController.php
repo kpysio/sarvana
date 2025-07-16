@@ -11,17 +11,33 @@ use App\Models\Tag;
 class FoodItemController extends Controller
 {
     // Display a listing of the provider's food items
-    public function index()
+    public function index(Request $request)
     {
-        $foodItems = FoodItem::where('provider_id', Auth::id())->get();
-        return view('food-items.index', compact('foodItems'));
+        $query = FoodItem::where('provider_id', Auth::id());
+
+        // Filter by status if provided
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        // Filter by search (title or category)
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%$search%")
+                  ->orWhere('category', 'like', "%$search%") ;
+            });
+        }
+
+        $items = $query->orderByDesc('created_at')->get();
+        return view('provider.food-items.index', compact('items'));
     }
 
     // Show the form for creating a new food item
     public function create()
     {
         $tags = Tag::all();
-        return view('food-items.create', compact('tags'));
+        return view('provider.food-items.create', compact('tags'));
     }
 
 
@@ -58,7 +74,7 @@ class FoodItemController extends Controller
     {
         $this->authorize('update', $foodItem);
         $tags = Tag::all();
-        return view('food-items.edit', compact('foodItem', 'tags'));
+        return view('provider.food-items.edit', compact('foodItem', 'tags'));
     }
 
     // Update the specified food item
@@ -105,7 +121,7 @@ class FoodItemController extends Controller
             'remaining' => $remainingQuantity,
             'order_rate' => $orderRate,
         ];
-        return view('food-items.show', compact('foodItem', 'orders', 'orderStats', 'orderStatusBreakdown', 'inventoryBreakdown'));
+        return view('provider.food-items.show', compact('foodItem', 'orders', 'orderStats', 'orderStatusBreakdown', 'inventoryBreakdown'));
     }
 
     // Remove the specified food item
@@ -141,5 +157,62 @@ class FoodItemController extends Controller
         $foodItem->status = 'inactive';
         $foodItem->save();
         return redirect()->route('provider.food-items.index')->with('success', 'Food item marked as sold out!');
+    }
+
+    public function placeOrder(Request $request, FoodItem $foodItem)
+    {
+        $this->authorize('update', $foodItem); // Only provider can place order for their item
+        $validated = $request->validate([
+            'customer_name' => 'required|string|max:255',
+            'customer_phone' => 'required|string|max:32',
+            'quantity' => 'required|integer|min:1|max:' . $foodItem->available_quantity,
+            'special_instruction' => 'nullable|string|max:500',
+        ]);
+
+        // Calculate total amount
+        $totalAmount = $foodItem->price * $validated['quantity'];
+
+        // Build customer notes
+        $notes = 'Phone order: ' . $validated['customer_name'] . ' (' . $validated['customer_phone'] . ')';
+        if (!empty($validated['special_instruction'])) {
+            $notes .= ' | Instruction: ' . $validated['special_instruction'];
+        }
+
+        // Find or create the special phone order customer
+        $phoneOrderCustomer = \App\Models\User::where('email', 'phoneorders@example.com')->first();
+        if (!$phoneOrderCustomer) {
+            // Fallback: create if not found
+            $phoneOrderCustomer = \App\Models\User::create([
+                'name' => 'Phone Order Customer',
+                'email' => 'phoneorders@example.com',
+                'password' => bcrypt('phoneorder123'),
+                'user_type' => 'customer',
+                'phone' => '0000000000',
+            ]);
+        }
+
+        // Create the order (use phone order customer_id)
+        $order = \App\Models\Order::create([
+            'customer_id' => $phoneOrderCustomer->id,
+            'provider_id' => $foodItem->provider_id,
+            'food_item_id' => $foodItem->id,
+            'quantity' => $validated['quantity'],
+            'total_amount' => $totalAmount,
+            'status' => \App\Models\Order::STATUS_PENDING,
+            'customer_notes' => $notes,
+        ]);
+
+        // Reduce available quantity
+        $foodItem->available_quantity -= $validated['quantity'];
+        $foodItem->save();
+
+        return redirect()->route('provider.food-items.show', $foodItem->id)
+            ->with('success', 'Order placed successfully for customer: ' . $validated['customer_name']);
+    }
+
+    public function placeOrderForm(FoodItem $foodItem)
+    {
+        $this->authorize('update', $foodItem);
+        return view('provider.food-items.place-order', compact('foodItem'));
     }
 } 

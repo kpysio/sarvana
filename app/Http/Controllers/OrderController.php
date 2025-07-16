@@ -68,6 +68,10 @@ class OrderController extends Controller
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'order_id' => $order->id]);
         }
+        // Redirect customers to the customer order detail page
+        if (auth()->user() && auth()->user()->isCustomer()) {
+            return redirect()->route('customers.orders.show', $order->id)->with('success', 'Order placed successfully!');
+        }
         return redirect()->route('orders.show', $order)->with('success', 'Order placed successfully!');
     }
 

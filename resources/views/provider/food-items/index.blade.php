@@ -63,10 +63,7 @@
                     </td>
                     <td class="border px-4 py-2 text-xs text-gray-500">{{ $item->available_quantity ?? 0 }}</td>
                     <td class="border px-4 py-2">
-                        <div class="flex gap-2">
-                            <a href="#" class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm font-semibold hover:bg-blue-200 transition">Edit</a>
-                            <a href="#" class="bg-red-100 text-red-700 px-3 py-1 rounded text-sm font-semibold hover:bg-red-200 transition">Delete</a>
-                        </div>
+                        <a href="{{ route('provider.food-items.show', $item->id) }}" class="bg-blue-600 text-white px-4 py-2 rounded text-sm font-semibold hover:bg-blue-700 transition">View</a>
                     </td>
                 </tr>
                 @empty

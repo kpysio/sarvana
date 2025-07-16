@@ -5,7 +5,7 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
+                    <a href="/">
                         <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
                     </a>
                 </div>
@@ -26,7 +26,7 @@
                         <x-nav-link :href="route('search.index')" :active="request()->routeIs('search.*')">
                             {{ __('Search') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
+                        <x-nav-link :href="route('customers.orders.index')" :active="request()->is('customer/orders*')">
                             {{ __('My Orders') }}
                         </x-nav-link>
                     @endif
@@ -101,7 +101,7 @@
                 <x-responsive-nav-link :href="route('search.index')" :active="request()->routeIs('search.*')">
                     {{ __('Search') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
+                <x-responsive-nav-link :href="route('customers.orders.index')" :active="request()->is('customer/orders*')">
                     {{ __('My Orders') }}
                 </x-responsive-nav-link>
             @endif

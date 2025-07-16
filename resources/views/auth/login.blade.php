@@ -10,6 +10,9 @@
         <x-auth-session-status class="mb-4" :status="session('status')" />
         <form method="POST" action="{{ route('login') }}">
             @csrf
+            @if(request('intended'))
+                <input type="hidden" name="intended" value="{{ request('intended') }}">
+            @endif
             <!-- Email Address -->
             <div>
                 <x-input-label for="email" :value="__('Email')" />

@@ -112,18 +112,23 @@ Route::middleware(['auth', 'provider'])->prefix('provider')->name('provider.')->
     Route::post('/food-items/{foodItem}/extend-expiry', [\App\Http\Controllers\Provider\FoodItemController::class, 'extendExpiry'])->name('food-items.extendExpiry');
     Route::post('/food-items/{foodItem}/reactivate', [\App\Http\Controllers\Provider\FoodItemController::class, 'reactivate'])->name('food-items.reactivate');
     Route::post('/food-items/{foodItem}/mark-sold-out', [\App\Http\Controllers\Provider\FoodItemController::class, 'markSoldOut'])->name('food-items.markSoldOut');
+    Route::post('/food-items/{foodItem}/place-order', [\App\Http\Controllers\Provider\FoodItemController::class, 'placeOrder'])->name('food-items.placeOrder');
+    Route::get('/food-items/{foodItem}/place-order-form', [\App\Http\Controllers\Provider\FoodItemController::class, 'placeOrderForm'])->name('food-items.placeOrderForm');
     // Order Management
     Route::get('/orders', [\App\Http\Controllers\Provider\OrderController::class, 'index'])->name('orders.index');
-    Route::get('/orders/{order}', [\App\Http\Controllers\Provider\OrderController::class, 'show'])->name('orders.show');
+    Route::get('/custemer/orders/{order}', [\App\Http\Controllers\Provider\OrderController::class, 'show'])->name('customers.orders.show');
     Route::put('/orders/{order}/status', [\App\Http\Controllers\Provider\OrderController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::post('/orders/{order}/add-note', [\App\Http\Controllers\Provider\OrderController::class, 'addNote'])->name('orders.addNote');
 });
 
 // ------------------- CUSTOMER ROUTES -------------------
-Route::middleware(['auth', 'customer'])->prefix('customer')->name('customer.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::middleware(['auth', 'customer'])->prefix('customer')->name('customers.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Customers\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/orders', [\App\Http\Controllers\Customers\OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [\App\Http\Controllers\Customers\OrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders', [\App\Http\Controllers\Customers\OrderController::class, 'store'])->name('orders.store');
+    Route::get('/food-items/{foodItem}', [\App\Http\Controllers\Customers\FoodItemController::class, 'show'])->name('food-items.show');
     // Add customer-specific order routes if needed
-    // Route::resource('orders', ...)
 });
 
 // ------------------- COMMON/AUTH ROUTES -------------------
@@ -155,14 +160,7 @@ Route::get('/food-items/{foodItem}', [FoodItemController::class, 'show'])->middl
 Route::get('/food-items/{foodItem}', [App\Http\Controllers\FoodItemController::class, 'publicShow'])->name('customers.food-item.show');
 // Orders (common for both roles)
 Route::middleware('auth')->group(function () {
-    Route::resource('orders', OrderController::class);
-    Route::post('/orders/{order}/accept', [OrderController::class, 'accept'])->name('orders.accept');
-    Route::post('/orders/{order}/reject', [OrderController::class, 'reject'])->name('orders.reject');
-    Route::post('/orders/{order}/preparing', [OrderController::class, 'preparing'])->name('orders.preparing');
-    Route::post('/orders/{order}/ready', [OrderController::class, 'ready'])->name('orders.ready');
-    Route::post('/orders/{order}/collected', [OrderController::class, 'collected'])->name('orders.collected');
-    Route::post('/orders/{order}/completed', [OrderController::class, 'completed'])->name('orders.completed');
-    Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    // Remove all Route::resource('orders', OrderController::class) and related POST/GET routes for /orders/{order} using OrderController
 });
 
 // Provider registration

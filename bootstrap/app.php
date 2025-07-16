@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'customer' => \App\Http\Middleware\CustomerMiddleware::class,
             'active.membership' => \App\Http\Middleware\ActiveMembershipMiddleware::class,
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'set.intended.url' => \App\Http\Middleware\SetIntendedUrl::class,
 
         ]);
     })

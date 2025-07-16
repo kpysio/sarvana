@@ -96,7 +96,7 @@ class FoodItemController extends Controller
             abort(404);
         }
         $foodItem->load(['provider', 'tags', 'reviews.reviewer']);
-        return view('customers.food-items.show', compact('foodItem'));
+        return view('food-items.public-show', compact('foodItem'));
     }
 
     /**

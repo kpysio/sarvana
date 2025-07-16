@@ -46,6 +46,11 @@ class AuthenticatedSessionController extends Controller
         }
 
         $request->session()->regenerate();
+        // Robust intended redirect using session
+        $intended = session()->pull('url.intended');
+        if ($intended) {
+            return redirect()->to($intended);
+        }
         // Role-based redirect
         if ($user->user_type === 'provider') {
             return redirect()->intended('/provider/dashboard');

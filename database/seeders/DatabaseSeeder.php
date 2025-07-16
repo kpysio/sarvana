@@ -52,6 +52,16 @@ class DatabaseSeeder extends Seeder
             'user_type' => 'customer',
         ]);
 
+        // Seed a special Phone Order Customer
+        \App\Models\User::firstOrCreate([
+            'email' => 'phoneorders@example.com',
+        ], [
+            'name' => 'Phone Order Customer',
+            'password' => bcrypt('phoneorder123'),
+            'user_type' => 'customer',
+            'phone' => '0000000000',
+        ]);
+
         // Create providers with Indian names
         $providers = User::factory()
             ->count(15)

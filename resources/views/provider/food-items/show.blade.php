@@ -10,6 +10,7 @@
         <div class="flex space-x-2">
             <a href="{{ route('provider.food-items.edit', $foodItem) }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Edit Item</a>
             <a href="{{ route('provider.food-items.index') }}" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">Back to My Store</a>
+            <a href="{{ route('provider.food-items.placeOrderForm', $foodItem->id) }}" class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700">Place Order</a>
         </div>
     </div>
 </div>

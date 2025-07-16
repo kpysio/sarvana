@@ -39,7 +39,11 @@
                             </div>
                             <div class="text-sm text-gray-600 mt-1 flex items-center">
                                 <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.485 0 4.847.657 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                {{ $order->customer->name ?? 'N/A' }}
+                                @if($order->customer)
+                                    {{ $order->customer->name }}
+                                @else
+                                    <span class="italic text-orange-600">Phone Order:</span> <span class="ml-1">{{ $order->customer_notes }}</span>
+                                @endif
                             </div>
                             <div class="text-xs text-blue-700 font-semibold mt-1 flex items-center">
                                 <svg class="w-4 h-4 mr-1 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V7a2 2 0 00-2-2h-4V3a1 1 0 00-2 0v2H6a2 2 0 00-2 2v6" /></svg>
