@@ -1,8 +1,15 @@
 @extends('layouts.app')
 
+<!-- {{-- Navigation --}}
+@auth
+    @include('layouts.navigation-customer')
+@else
+    @include('layouts.navigation-guest')
+@endauth -->
+
 @section('content')
 <div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-3xl mx-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <a href="{{ url()->previous() }}" class="text-orange-600 hover:underline mb-6 inline-block font-semibold">&larr; Back</a>
         <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
             <!-- Food Image -->

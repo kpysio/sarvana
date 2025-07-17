@@ -13,7 +13,7 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
+                        {{ __('Dashboard2') }}
                     </x-nav-link>
                     @if(Auth::user() && Auth::user()->user_type === 'provider')
                         <x-nav-link :href="route('provider.food-items.index')" :active="request()->routeIs('provider.food-items.*')">

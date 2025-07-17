@@ -16,11 +16,16 @@
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
-            @auth
-                @include('layouts.navigation')
-            @else
+            @php
+                $isCustomer = Auth::check() && Auth::user()->user_type === 'customer';
+                $isCustomerRoute = request()->is('customer*');
+            @endphp
+            @if($isCustomer && $isCustomerRoute)
+                @include('layouts.navigation-customer')
+            @elseif(Auth::guest())
                 @includeIf('layouts.navigation-guest')
-            @endauth
+          
+            @endif
 
             <!-- Page Heading -->
             @isset($header)

@@ -46,7 +46,7 @@
         @foreach($statuses as $status => $label)
             @if(isset($grouped[$status]) && $grouped[$status]->count())
                 <h3 class="text-xl font-bold mt-10 mb-4 text-{{ $status === 'active' ? 'green' : ($status === 'inactive' ? 'gray' : 'red') }}-700">{{ $label }}</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="{{ $view==='grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8' : 'flex flex-col gap-4' }}">
                     @foreach($grouped[$status] as $item)
                         @php
                             $photos = $item->photos;
@@ -57,21 +57,21 @@
                                 $photos = [];
                             }
                         @endphp
-                        <div class="bg-white rounded-xl shadow p-5 flex flex-col gap-3 relative">
-                            <div class="flex gap-3 items-center">
+                        <div class="bg-white/90 rounded-2xl shadow-lg p-6 flex {{ $view==='grid' ? 'flex-col h-full' : 'flex-row items-center' }} gap-6 border border-gray-100 hover:shadow-2xl transition-shadow relative group">
+                            <div class="flex gap-4 items-center {{ $view==='list' ? 'mb-0' : 'mb-4' }}">
                                 @if(count($photos) > 0)
                                     @php
                                         $photo = $photos[0];
                                         $isUrl = Str::startsWith($photo, ['http://', 'https://']);
                                         $src = $isUrl ? $photo : asset('storage/' . ltrim($photo, '/'));
                                     @endphp
-                                    <img class="w-20 h-20 object-cover rounded-lg" src="{{ $src }}" alt="">
+                                    <img class="w-24 h-24 object-cover rounded-xl border shadow-sm" src="{{ $src }}" alt="">
                                 @else
-                                    <div class="w-20 h-20 bg-gray-200 flex items-center justify-center rounded-lg text-gray-400">No Photo</div>
+                                    <div class="w-24 h-24 bg-gray-200 flex items-center justify-center rounded-xl text-gray-400 border">No Photo</div>
                                 @endif
                                 <div>
-                                    <div class="font-semibold text-lg text-gray-900">{{ $item->title }}</div>
-                                    <div class="text-sm text-gray-500">{{ Str::limit($item->description, 50) }}</div>
+                                    <div class="font-bold text-lg text-gray-900 mb-1">{{ $item->title }}</div>
+                                    <div class="text-sm text-gray-500 mb-1">{{ Str::limit($item->description, 50) }}</div>
                                     <div class="flex flex-wrap gap-2 mt-1">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $item->status === 'active' ? 'bg-green-100 text-green-800' : ($item->status === 'inactive' ? 'bg-gray-100 text-gray-800' : 'bg-red-100 text-red-800') }}">
                                             {{ ucfirst($item->status) }}
@@ -80,10 +80,27 @@
                                         <span class="px-2 py-0.5 rounded-full text-xs bg-yellow-50 text-yellow-700">£{{ $item->price }}</span>
                                         <span class="px-2 py-0.5 rounded-full text-xs bg-purple-50 text-purple-700">Qty: {{ $item->available_quantity }}</span>
                                     </div>
+                                    @if($item->tags && $item->tags->count())
+                                        <div class="flex flex-wrap gap-1 mt-2">
+                                            @foreach($item->tags as $tag)
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm" style="background: {{ $tag->color ?? '#f3f4f6' }}; color: #222;">
+                                                    <span>{{ $tag->icon }}</span>
+                                                    <span>{{ $tag->name }}</span>
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
-                            <div class="flex gap-2 mt-3">
-                                <a href="{{ route('provider.food-items.show', $item) }}" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-center py-2 rounded-lg font-semibold">View</a>
+                            <div class="mt-auto flex flex-wrap gap-2 {{ $view==='list' ? 'ml-auto' : '' }}">
+                                <a href="{{ route('provider.food-items.show', $item) }}" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-center py-2 rounded-lg font-semibold text-xs transition">View</a>
+                                <a href="{{ route('provider.food-items.edit', $item) }}" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white text-center py-2 rounded-lg font-semibold text-xs transition">Edit</a>
+                                <a href="{{ route('provider.food-items.create', ['clone_id' => $item->id]) }}" class="flex-1 bg-green-500 hover:bg-green-600 text-white text-center py-2 rounded-lg font-semibold text-xs transition">Clone</a>
+                                <form action="{{ route('provider.food-items.destroy', $item) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this item?');" class="flex-1">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white text-center py-2 rounded-lg font-semibold text-xs transition">Delete</button>
+                                </form>
                             </div>
                         </div>
                     @endforeach

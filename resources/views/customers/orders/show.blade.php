@@ -21,7 +21,7 @@
 
         <!-- Page Content -->
         <main class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <a href="{{ route('customers.orders.index') }}" class="text-orange-600 dark:text-orange-400 hover:underline mb-6 inline-block font-semibold">&larr; Back to Orders</a>
                 @if(!$order->foodItem)
                     <div class="text-red-600 font-bold p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700">No food item found for this order. Please check the order data.</div>

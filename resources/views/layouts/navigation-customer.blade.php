@@ -6,9 +6,9 @@
                 <div class="flex-shrink-0 flex items-center">
                     <a href="/" class="flex items-center space-x-2">
                         <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                            <span class="text-white font-bold text-lg">S</span>
+                            <span class="text-white font-bold text-lg">F</span>
                         </div>
-                        <span class="text-xl font-bold text-gray-900 dark:text-white">Sarvana</span>
+                        <span class="text-xl font-bold text-gray-900 dark:text-white">FreshLocal</span>
                     </a>
                 </div>
 
