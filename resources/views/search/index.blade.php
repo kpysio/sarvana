@@ -259,7 +259,17 @@
                     <div id="foodGrid" class="grid gap-6 {{ !request('view') || request('view')=='grid' ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1' }}">
                         @forelse($foodItems as $item)
                             <a href="{{ route('customers.food-item.show', $item) }}" class="block">
-                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200 cursor-pointer relative group">
+                                @php
+                                    $photos = $item->photos ?? [];
+                                    if (is_string($photos)) {
+                                        $photos = json_decode($photos, true);
+                                    }
+                                    if (!is_array($photos)) {
+                                        $photos = [];
+                                    }
+                                    $isListView = request('view') == 'list';
+                                @endphp
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200 cursor-pointer relative group {{ $isListView ? 'flex flex-row items-center gap-4 p-4' : '' }}">
                                     <!-- Badges -->
                                     <div class="absolute top-3 left-3 flex flex-col gap-1 z-10">
                                         @if($item->price < 10)
@@ -270,64 +280,103 @@
                                         @endif
                                     </div>
                                     <!-- Food Image -->
-                                    @php
-                                        $photos = $item->photos ?? [];
-                                        if (is_string($photos)) {
-                                            $photos = json_decode($photos, true);
-                                        }
-                                        if (!is_array($photos)) {
-                                            $photos = [];
-                                        }
-                                    @endphp
-                                    <div class="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-t-lg bg-gray-200 dark:bg-gray-700">
-                                        @if(count($photos) > 0)
-                                            @php
-                                                $photo = $photos[0];
-                                                $isUrl = Str::startsWith($photo, ['http://', 'https://']);
-                                                $src = $isUrl ? $photo : asset('storage/' . ltrim($photo, '/'));
-                                            @endphp
-                                            <img src="{{ $src }}" alt="{{ $item->title }}" class="h-full w-full object-cover object-center group-hover:opacity-75">
-                                        @else
-                                            <div class="h-full w-full flex items-center justify-center">
-                                                <span class="text-gray-400 dark:text-gray-500 text-sm">No Image</span>
-                                            </div>
-                                        @endif
-                                    </div>
-                                    <!-- Food Details -->
-                                    <div class="p-4">
-                                        <div class="flex items-center justify-between mb-2">
-                                            <h3 class="text-sm font-medium text-gray-900 dark:text-white">{{ $item->title }}</h3>
-                                            <p class="text-sm font-bold text-orange-600 dark:text-orange-400">₹{{ number_format($item->price, 2) }}</p>
-                                        </div>
-                                        <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
-                                            <span>{{ $item->provider->name ?? 'Unknown Provider' }}</span>
-                                            @if($item->provider && $item->provider->rating)
-                                                <span class="flex items-center">
-                                                    <span class="text-yellow-400 mr-1">⭐</span>
-                                                    {{ number_format($item->provider->rating, 1) }}
-                                                </span>
+                                    @if($isListView)
+                                        <div class="w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700">
+                                            @if(count($photos) > 0)
+                                                @php
+                                                    $photo = $photos[0];
+                                                    $isUrl = Str::startsWith($photo, ['http://', 'https://']);
+                                                    $src = $isUrl ? $photo : asset('storage/' . ltrim($photo, '/'));
+                                                @endphp
+                                                <img src="{{ $src }}" alt="{{ $item->title }}" class="w-full h-full object-cover">
+                                            @else
+                                                <div class="w-full h-full flex items-center justify-center">
+                                                    <span class="text-gray-400 dark:text-gray-500 text-sm">No Image</span>
+                                                </div>
                                             @endif
                                         </div>
-                                        <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                                            <span>{{ $item->available_quantity }} left</span>
-                                            <span>{{ $item->available_date ? \Carbon\Carbon::parse($item->available_date)->format('M d') : 'N/A' }}</span>
-                                        </div>
-                                        <!-- Tags -->
-                                        @if($item->tags && count($item->tags) > 0)
-                                            <div class="mt-2 flex flex-wrap gap-1">
-                                                @foreach($item->tags->take(2) as $tag)
-                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style="background: {{ $tag->color ?? '#f59e42' }}20; color: {{ $tag->color ?? '#f59e42' }};">
-                                                        {{ $tag->icon ?? '' }} {{ $tag->name }}
-                                                    </span>
-                                                @endforeach
-                                                @if($item->tags->count() > 2)
-                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
-                                                        +{{ $item->tags->count() - 2 }} more
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center justify-between mb-2">
+                                                <h3 class="text-base font-medium text-gray-900 dark:text-white truncate">{{ $item->title }}</h3>
+                                                <p class="text-base font-bold text-orange-600 dark:text-orange-400">₹{{ number_format($item->price, 2) }}</p>
+                                            </div>
+                                            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
+                                                <span class="truncate">{{ $item->provider->name ?? 'Unknown Provider' }}</span>
+                                                @if($item->provider && $item->provider->rating)
+                                                    <span class="flex items-center">
+                                                        <span class="text-yellow-400 mr-1">⭐</span>
+                                                        {{ number_format($item->provider->rating, 1) }}
                                                     </span>
                                                 @endif
                                             </div>
-                                        @endif
-                                    </div>
+                                            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                                                <span>{{ $item->available_quantity }} left</span>
+                                                <span>{{ $item->available_date ? \Carbon\Carbon::parse($item->available_date)->format('M d') : 'N/A' }}</span>
+                                            </div>
+                                            @if($item->tags && count($item->tags) > 0)
+                                                <div class="mt-2 flex flex-wrap gap-1">
+                                                    @foreach($item->tags->take(2) as $tag)
+                                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style="background: {{ $tag->color ?? '#f59e42' }}20; color: {{ $tag->color ?? '#f59e42' }};">
+                                                            {{ $tag->icon ?? '' }} {{ $tag->name }}
+                                                        </span>
+                                                    @endforeach
+                                                    @if($item->tags->count() > 2)
+                                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+                                                            +{{ $item->tags->count() - 2 }} more
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <div class="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-t-lg bg-gray-200 dark:bg-gray-700">
+                                            @if(count($photos) > 0)
+                                                @php
+                                                    $photo = $photos[0];
+                                                    $isUrl = Str::startsWith($photo, ['http://', 'https://']);
+                                                    $src = $isUrl ? $photo : asset('storage/' . ltrim($photo, '/'));
+                                                @endphp
+                                                <img src="{{ $src }}" alt="{{ $item->title }}" class="h-full w-full object-cover object-center group-hover:opacity-75">
+                                            @else
+                                                <div class="h-full w-full flex items-center justify-center">
+                                                    <span class="text-gray-400 dark:text-gray-500 text-sm">No Image</span>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="p-4">
+                                            <div class="flex items-center justify-between mb-2">
+                                                <h3 class="text-sm font-medium text-gray-900 dark:text-white">{{ $item->title }}</h3>
+                                                <p class="text-sm font-bold text-orange-600 dark:text-orange-400">₹{{ number_format($item->price, 2) }}</p>
+                                            </div>
+                                            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
+                                                <span>{{ $item->provider->name ?? 'Unknown Provider' }}</span>
+                                                @if($item->provider && $item->provider->rating)
+                                                    <span class="flex items-center">
+                                                        <span class="text-yellow-400 mr-1">⭐</span>
+                                                        {{ number_format($item->provider->rating, 1) }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                                                <span>{{ $item->available_quantity }} left</span>
+                                                <span>{{ $item->available_date ? \Carbon\Carbon::parse($item->available_date)->format('M d') : 'N/A' }}</span>
+                                            </div>
+                                            @if($item->tags && count($item->tags) > 0)
+                                                <div class="mt-2 flex flex-wrap gap-1">
+                                                    @foreach($item->tags->take(2) as $tag)
+                                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style="background: {{ $tag->color ?? '#f59e42' }}20; color: {{ $tag->color ?? '#f59e42' }};">
+                                                            {{ $tag->icon ?? '' }} {{ $tag->name }}
+                                                        </span>
+                                                    @endforeach
+                                                    @if($item->tags->count() > 2)
+                                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+                                                            +{{ $item->tags->count() - 2 }} more
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endif
                                 </div>
                             </a>
                         @empty
